@@ -227,13 +227,36 @@
             .side-image-right { right: 10px; }
         </style>
     <script>
-        // 초기 상태: 로그인 화면만 표시
-        function initSystem() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('eval-screen').classList.add('hidden');
-            document.getElementById('stats-screen').classList.add('hidden');
+        // 자동 재생 시도 및 사용자 인터랙션 대기
+        function tryAutoplay() {
+            const audio = document.getElementById('audio-bgm');
+            const status = document.getElementById('bgm-status');
+            
+            // 재생 시도 (브라우저 정책에 따라 거부될 수 있음)
+            const playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    status.innerText = "ON (Playing)";
+                    status.style.color = "#00FF00";
+                }).catch(() => {
+                    // 차단된 경우 첫 클릭 시 재생되도록 이벤트 등록
+                    const startOnFirstClick = () => {
+                        audio.play();
+                        status.innerText = "ON (Playing)";
+                        status.style.color = "#00FF00";
+                        document.removeEventListener('click', startOnFirstClick);
+                        document.removeEventListener('keydown', startOnFirstClick);
+                    };
+                    document.addEventListener('click', startOnFirstClick);
+                    document.addEventListener('keydown', startOnFirstClick);
+                });
+            }
         }
-        window.addEventListener('load', initSystem);
+        window.addEventListener('load', () => {
+            initSystem();
+            tryAutoplay();
+        });
     </script>
     <style>
         @media (max-width: 480px) {
@@ -284,8 +307,8 @@
         <span>🎵 웅장한 비행 BGM</span>
         <span id="bgm-status">OFF</span>
     </div>
-    <audio id="audio-bgm" loop>
-        <!-- 더 안정적이고 웅장한 무료 음원 링크로 교체 -->
+    <audio id="audio-bgm" loop autoplay>
+        <!-- 더 안정적이고 웅장한 무료 음원 링크 (자동 재생 지원용) -->
         <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3" type="audio/mpeg">
     </audio>
 
