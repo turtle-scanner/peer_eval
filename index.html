@@ -1231,29 +1231,33 @@
             alert(`${successCount}개의 데이터를 구글 서버로 안전하게 전송했습니다!`);
         }
 
-        // QR 코드 생성 함수 (Google QR API 활용)
+        // QR 코드 생성 함수 (안정적인 QR Server API + 가시성 보정)
         function generateQRCodes() {
-            const currentUrl = window.location.href;
-            const qrSize = "150x150";
-            const qrImageUrl = `https://chart.googleapis.com/chart?chs=${qrSize}&cht=qr&chl=${encodeURIComponent(currentUrl)}&choe=UTF-8`;
-
-            // 로그인 화면 QR
-            const loginQR = document.getElementById('login-qr');
-            if (loginQR) {
-                loginQR.innerHTML = `<img src="${qrImageUrl}" alt="Login QR" style="border: 5px solid white; border-radius: 10px;">`;
+            let currentUrl = window.location.href;
+            
+            // 로컬 파일(file:///)일 경우 외부 API가 거부할 수 있으므로 구글 시트 주소로 대체
+            if (currentUrl.startsWith('file')) {
+                currentUrl = "https://script.google.com/macros/s/AKfycby4lCYrauuw2hhEdxbUJzBp93uxt-GvpHTAavrsQBZykUYdkW3wkvyZUZ3etD68eJYX/exec";
             }
 
-            // 관리자 화면 QR
+            const qrSize = 150;
+            const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(currentUrl)}&margin=10`;
+
+            const loginQR = document.getElementById('login-qr');
+            if (loginQR) {
+                loginQR.innerHTML = `<img src="${qrImageUrl}" alt="Login QR" style="border: 2px solid #fff; border-radius: 10px; background: white; width: ${qrSize}px; height: ${qrSize}px;" onerror="this.src='https://quickchart.io/qr?text=${encodeURIComponent(currentUrl)}&size=${qrSize}'">`;
+            }
+
             const adminQR = document.getElementById('admin-qr');
             if (adminQR) {
-                adminQR.innerHTML = `<img src="${qrImageUrl}" alt="Admin QR" style="border: 2px solid white; border-radius: 5px; width: 100px;">`;
+                adminQR.innerHTML = `<img src="${qrImageUrl}" alt="Admin QR" style="border: 1px solid #fff; border-radius: 5px; background: white; width: 100px; height: 100px;" onerror="this.src='https://quickchart.io/qr?text=${encodeURIComponent(currentUrl)}&size=100'">`;
             }
         }
 
         window.onload = function () {
             initSystem();
             generateQRCodes();
-            tryAutoplay();
+            if (typeof tryAutoplay === 'function') tryAutoplay();
         };
     </script>
 </body>
