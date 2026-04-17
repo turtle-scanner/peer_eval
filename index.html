@@ -606,8 +606,8 @@
         const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let currentUser = null;
 
-        // [서버 설정] 구글 스프레드시트 Apps Script 최종 연동 (시트 연결형)
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwMLEThat_yfWdpbLAbp-j00OhYtx2bm_oBv68p70lzzfNegDyql6QgdZQSN7oXneGT/exec"; 
+        // [서버 설정] 구글 스프레드시트 Apps Script 최종 연동 완료
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyEmuzRSjkxvEtrPa9G1kmabCKvl0aNF6XPKtsp0-NBe-YhiyKplPPinuKA4EiJNp0b/exec"; 
 
         // 학생 정보 DB (6인 체제: 학생 5명 + 선생님)
         const studentDB = {
@@ -1131,6 +1131,41 @@
                 location.reload();
             }
         }
+        // 기존 로컬 데이터를 구글 시트로 일괄 전송하는 함수 (동기화)
+        async function syncDataToServer() {
+            if (!GOOGLE_SHEET_URL) {
+                alert('연동된 구글 시트 주소가 없습니다.');
+                return;
+            }
+            if (evaluations.length === 0) {
+                alert('전송할 기존 데이터가 없습니다.');
+                return;
+            }
+
+            if (!confirm(`현재 로컬에 저장된 ${evaluations.length}개의 데이터를 구글 시트로 전송하시겠습니까?\n(이미 보낸 데이터는 중복 저장될 수 있습니다.)`)) return;
+
+            let successCount = 0;
+            for (const data of evaluations) {
+                try {
+                    // 전송 시 날짜 데이터가 없으면 추가 보정
+                    if (!data.date) data.date = new Date().toLocaleDateString('ko-KR');
+                    
+                    await fetch(GOOGLE_SHEET_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    successCount++;
+                } catch (e) {
+                    console.error("Sync Error:", e);
+                }
+            }
+            alert(`${successCount}개의 데이터를 구글 서버로 안전하게 전송했습니다!`);
+        }
+
+        window.onload = initSystem;
     </script>
 </body>
 
