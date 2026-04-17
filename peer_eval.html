@@ -357,6 +357,10 @@
         </div>
 
         <div id="eval-screen" class="card hidden">
+            <!-- 선생님의 응원 문구 -->
+            <div style="text-align: center; color: #FFFF00; font-style: italic; font-size: 14px; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; line-height: 1.6;">
+                "지금의 부족함은 너희가 더 높이 점프하기 위해<br>잠시 굽히고 있는 무릎과 같다"
+            </div>
             <img src="drone_hero.png"
                 style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
             <h2>🎥 동료평가 입력</h2>
@@ -476,13 +480,22 @@
         const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let currentUser = null;
 
-        // 학생 정보 DB (제공해주신 데이터 중심)
+        // 학생 정보 DB (제공해주신 데이터 최신화)
         const studentDB = {
             "3606": "문정욱",
             "3507": "김종학",
             "3517": "조우민",
             "3603": "김예담",
-            "3501": "보성" // 예시 번호
+            "3503": "보성"
+        };
+
+        // 선생님의 따뜻한 한마디 DB
+        const teacherComments = {
+            "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
+            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 [서론-본론-결론-하이라이트]라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
+            "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
+            "조우민": "성장의 즐거움을 증명한 우민아! 지난주보다 눈에 띄게 향상된 실력을 보며 선생님은 정말 뿌듯했단다. 지금처럼 '어제의 나보다 더 나은 오늘의 나'를 만드는 노력을 멈추지 마렴. 다음 영상에서는 또 어떤 발전을 보여줄지 벌써 기대가 되는구나!",
+            "김종학": "창의적인 눈을 가진 종학아! 너의 감각은 충분히 훌륭해. 다만 그 감각이 결실을 맺으려면 조금 더 깊은 집중력과 시간 투자가 필요하단다. 이번에 부족했던 영상 시간과 내용을 네 독창적인 아이디어로 채워보렴. 네가 집중하는 순간, 영상의 퀄리티는 마법처럼 변할 거야!"
         };
 
         const gradeCriteria = {
@@ -498,8 +511,8 @@
         function nextLoginStep() {
             const id = document.getElementById('student-id').value;
             
-            // 관리자 마스터 키 체크 (1983!!)
-            if (id === "1983!!") {
+            // 관리자 마스터 키 체크 (1983)
+            if (id === "1983") {
                 alert('관리자 모드로 접속합니다.');
                 currentUser = "관리자";
                 document.getElementById('login-screen').classList.add('hidden');
@@ -665,7 +678,7 @@
 
         function showStats() {
             const adminPw = prompt('관리자만 접근 가능합니다. 암호를 입력하세요:');
-            if (adminPw === "1983!!") {
+            if (adminPw === "1983") {
                 document.getElementById('eval-screen').classList.add('hidden');
                 document.getElementById('stats-screen').classList.remove('hidden');
                 updateDashboard();
@@ -724,6 +737,9 @@
                 // AI 종합 의견 생성 시뮬레이션
                 const aiAnalysis = `이 학생은 "${data.topics[0] || '주제 미정'}" 중심의 영상 기획에서 동료들에게 평균 ${avg.toFixed(1)}점의 신뢰를 얻었습니다. ${finalGrade}등급은 전반적으로 ${finalGrade === 'A' ? '혁신적인 아이디어' : '성실한 수행'}를 보여주었음을 의미합니다.`;
 
+                // 선생님 피드백 가져오기
+                const teacherMsg = teacherComments[student] || "훌륭한 노력이었습니다. 다음 주에는 더 멋진 영상을 기대할게요!";
+
                 const card = document.createElement('div');
                 card.className = 'student-stat-card';
                 card.style.flexDirection = 'column';
@@ -737,9 +753,13 @@
                         </div>
                         <div class="stat-badge" style="font-size:24px;">${finalGrade}</div>
                     </div>
-                    <div style="background:#222; padding:10px; border-radius:10px; width:100%; font-size:12px; border-left:3px solid #FFFF00;">
+                    <div style="background:#222; padding:12px; border-radius:10px; width:100%; font-size:12px; border-left:3px solid #FFFF00; margin-bottom:10px;">
                         <strong style="color:#FFFF00;">🤖 AI 종합 평가:</strong><br>
                         ${aiAnalysis}
+                    </div>
+                    <div style="background:rgba(255,255,0,0.05); padding:12px; border-radius:10px; width:100%; font-size:12px; border:1px dashed #FFFF00;">
+                        <strong style="color:#FFFF00;">💌 선생님의 따뜻한 한마디:</strong><br>
+                        <span style="color:#eee; line-height:1.5;">${teacherMsg.replace(/\*/g, '')}</span>
                     </div>
                 `;
                 container.appendChild(card);
