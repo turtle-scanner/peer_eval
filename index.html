@@ -185,6 +185,21 @@
             height: 20px;
             margin-right: 15px;
             accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* 체크 해제 시 감점 표시 스타일 */
+        .checklist-item input:not(:checked) + .checklist-text {
+            color: #ff4444 !important;
+            text-decoration: line-through;
+            opacity: 0.8;
+        }
+        .checklist-item input:not(:checked) + .checklist-text::after {
+            content: " (미충족 감점)";
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: middle;
         }
 
         /* 점수 표시 */
@@ -461,11 +476,11 @@
 
             <label>3. 필수 체크리스트 (항목 누락 시 등급 자동 하락)</label>
             <div id="checklist" style="margin-bottom: 25px;">
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 1) 영상 길이 15분 준수</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 2) 돈 계산/미래 비교 자막 포함</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 3) 자막/음악 조화</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 4) 신선한 아이디어</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 5) 제출 시간 엄수</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">1) 영상 길이 15분 준수</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">2) 돈 계산/미래 비교 자막 포함</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">3) 자막/음악 조화</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">4) 신선한 아이디어</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">5) 제출 시간 엄수</span></label>
             </div>
 
             <label>4. 최종 종합 등급 (체크리스트에 따라 자동 결정)</label>
