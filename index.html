@@ -605,8 +605,8 @@
         const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let currentUser = null;
 
-        // [서버 설정] 구글 스프레드시트 Apps Script URL 연동 완료
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzB_tdxJkx8_pc7orbjpbAQXXk_Ey7KppmrfoQe6yePn1RIqeuh9AswhORZNaQ1pG7URg/exec"; 
+        // [서버 설정] 구글 스프레드시트 Apps Script URL 최종 연동 완료
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxCoh1dIAAE1fd-xcx6RrZjsXoTx9eG2cKzArYmg52dsBZHiZew1QWSprWO4AxyaOgmQw/exec"; 
 
         // 학생 정보 DB (성 제거하여 선택지와 일치시킴)
         const studentDB = {
@@ -789,12 +789,13 @@
             let targetGradeId = "";
             let score = 0;
 
-            // 체크 개수에 따른 등급 및 점수 결정
+            // 체크 개수에 따른 등급 및 점수 결정 (선생님 요청 반영: 1개는 E등급)
             if (checkedCount === 5) { targetGradeId = "grade-a"; score = 12.5; }
             else if (checkedCount === 4) { targetGradeId = "grade-b"; score = 11; }
             else if (checkedCount === 3) { targetGradeId = "grade-c"; score = 9; }
-            else if (checkedCount === 2 || checkedCount === 1) { targetGradeId = "grade-d"; score = 7; }
-            else { targetGradeId = "grade-e"; score = 5; }
+            else if (checkedCount === 2) { targetGradeId = "grade-d"; score = 7; }
+            else if (checkedCount === 1) { targetGradeId = "grade-e"; score = 5; }
+            else { targetGradeId = "grade-i"; score = 3; }
 
             // 하단 등급 라디오 버튼 자동 선택
             const grades = document.getElementsByName('grade');
