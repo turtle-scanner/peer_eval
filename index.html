@@ -579,6 +579,12 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- 학생별 상세 결과 카드 리스트 (레이더 차트 포함) 장소 추가 -->
+            <div id="student-stats-list" style="margin-top:20px; display: flex; flex-direction: column; gap: 20px;">
+                <!-- JS (renderIndividualResults)로 렌더링 됩니다 -->
+            </div>
+            
             
             <div style="margin-top:25px; display:flex; flex-direction:column; gap:10px;">
                 <button class="btn" style="background:#4CAF50; color:white;" onclick="downloadCSV()">🟢 평가 데이터 CSV 다운로드</button>
@@ -603,7 +609,7 @@
     </div>
 
     <script>
-        const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
+        let evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let currentUser = null;
 
         // [서버 설정] 구글 스프레드시트 Apps Script 최종 연동 (주소 지정형 완료)
@@ -964,6 +970,9 @@
                 `;
             });
             statsBody.innerHTML = html;
+            
+            // 상세 차트 카드 렌더링 호출 추가
+            renderIndividualResults();
         }
 
         // 등급 산출 로직
@@ -1147,7 +1156,6 @@
             let successCount = 0;
             for (const data of evaluations) {
                 try {
-                    // 전송 시 날짜 데이터가 없으면 추가 보정
                     if (!data.date) data.date = new Date().toLocaleDateString('ko-KR');
                     
                     await fetch(GOOGLE_SHEET_URL, {
@@ -1165,7 +1173,30 @@
             alert(`${successCount}개의 데이터를 구글 서버로 안전하게 전송했습니다!`);
         }
 
-        window.onload = initSystem;
+        // QR 코드 생성 함수 (Google QR API 활용)
+        function generateQRCodes() {
+            const currentUrl = window.location.href;
+            const qrSize = "150x150";
+            const qrImageUrl = `https://chart.googleapis.com/chart?chs=${qrSize}&cht=qr&chl=${encodeURIComponent(currentUrl)}&choe=UTF-8`;
+            
+            // 로그인 화면 QR
+            const loginQR = document.getElementById('login-qr');
+            if (loginQR) {
+                loginQR.innerHTML = `<img src="${qrImageUrl}" alt="Login QR" style="border: 5px solid white; border-radius: 10px;">`;
+            }
+            
+            // 관리자 화면 QR
+            const adminQR = document.getElementById('admin-qr');
+            if (adminQR) {
+                adminQR.innerHTML = `<img src="${qrImageUrl}" alt="Admin QR" style="border: 2px solid white; border-radius: 5px; width: 100px;">`;
+            }
+        }
+
+        window.onload = function() {
+            initSystem();
+            generateQRCodes();
+            tryAutoplay();
+        };
     </script>
 </body>
 
