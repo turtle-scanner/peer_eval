@@ -213,6 +213,19 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+        <style>
+            .side-image {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 120px;
+                opacity: 0.6;
+                pointer-events: none;
+                z-index: 1;
+            }
+            .side-image-left { left: 10px; }
+            .side-image-right { right: 10px; }
+        </style>
     <script>
         // 초기 상태: 로그인 화면만 표시
         function initSystem() {
@@ -263,13 +276,17 @@
 
     <!-- 실시간 한국 시간 표시 -->
     <div id="current-time-view" class="time-display">KST: --:--:--</div>
+        <!-- 좌우 장식 이미지 -->
+        <img src="cherry_left.png" class="side-image side-image-left" alt="벚꽃">
+        <img src="drone_right.png" class="side-image side-image-right" alt="드론">
 
     <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
         <span>🎵 웅장한 비행 BGM</span>
         <span id="bgm-status">OFF</span>
     </div>
     <audio id="audio-bgm" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
+        <!-- 더 안정적이고 웅장한 무료 음원 링크로 교체 -->
+        <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3" type="audio/mpeg">
     </audio>
 
     <div class="container">
@@ -297,7 +314,7 @@
             <div id="login-step-1">
                 <div class="input-group">
                     <label for="student-id">1단계: 학번을 입력하세요</label>
-                    <input type="text" id="student-id" placeholder="예: 3606" maxlength="4">
+                    <input type="text" id="student-id" placeholder="예: 3101" maxlength="4">
                 </div>
                 <button class="btn" onclick="nextLoginStep()">다음 단계 (인증)</button>
             </div>

@@ -213,6 +213,19 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
+        <style>
+            .side-image {
+                position: fixed;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 120px;
+                opacity: 0.6;
+                pointer-events: none;
+                z-index: 1;
+            }
+            .side-image-left { left: 10px; }
+            .side-image-right { right: 10px; }
+        </style>
     <script>
         // 초기 상태: 로그인 화면만 표시
         function initSystem() {
@@ -263,13 +276,17 @@
 
     <!-- 실시간 한국 시간 표시 -->
     <div id="current-time-view" class="time-display">KST: --:--:--</div>
+        <!-- 좌우 장식 이미지 -->
+        <img src="cherry_left.png" class="side-image side-image-left" alt="벚꽃">
+        <img src="drone_right.png" class="side-image side-image-right" alt="드론">
 
     <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
         <span>🎵 웅장한 비행 BGM</span>
         <span id="bgm-status">OFF</span>
     </div>
     <audio id="audio-bgm" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
+        <!-- 더 안정적이고 웅장한 무료 음원 링크로 교체 -->
+        <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3" type="audio/mpeg">
     </audio>
 
     <div class="container">
@@ -297,7 +314,7 @@
             <div id="login-step-1">
                 <div class="input-group">
                     <label for="student-id">1단계: 학번을 입력하세요</label>
-                    <input type="text" id="student-id" placeholder="예: 3606" maxlength="4">
+                    <input type="text" id="student-id" placeholder="예: 3101" maxlength="4">
                 </div>
                 <button class="btn" onclick="nextLoginStep()">다음 단계 (인증)</button>
             </div>
@@ -481,6 +498,21 @@
 
         // 선생님의 따뜻한 한마디 DB
         const teacherComments = {
+            "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
+            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 **[서론-본론-결론-하이라이트]**라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
+            "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
+            "조우민": "성장의 즐거움을 증명한 우민아! 지난주보다 눈에 띄게 향상된 실력을 보며 선생님은 정말 뿌듯했단다. 지금처럼 '어제의 나보다 더 나은 오늘의 나'를 만드는 노력을 멈추지 마렴. 다음 영상에서는 또 어떤 발전을 보여줄지 벌써 기대가 되는구나!",
+            "김종학": "창의적인 눈을 가진 종학아! 너의 감각은 충분히 훌륭해. 다만 그 감각이 결실을 맺으려면 조금 더 깊은 집중력과 시간 투자가 필요하단다. 이번에 부족했던 영상 시간과 내용을 네 독창적인 아이디어로 채워보렴. 네가 집중하는 순간, 영상의 퀄리티는 마법처럼 변할 거야!"
+        };
+
+        // 각 학생별 정답 영상 주제 (예시) – 5번 입력 필수
+        const expectedTopics = {
+            "종학": "국내 캠핑(차박) 2박 3일 소개하기",
+            "예담": "드론 미래 배송 서비스 홍보",
+            "보성": "드론을 활용한 자연 풍경 촬영",
+            "정욱": "드론을 이용한 스포츠 경기 중계",
+            "우민": "드론을 활용한 교육 콘텐츠 제작"
+        };
             "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
             "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 [서론-본론-결론-하이라이트]라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
             "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
