@@ -560,7 +560,25 @@
                 </div>
             </div>
 
-            <canvas id="gradeChart"></canvas>
+            <canvas id="gradeChart" style="display:none;"></canvas>
+
+            <!-- 학생별 실시간 성적 현황판 -->
+            <div id="student-stats-container" style="margin-bottom:20px;">
+                <table style="width:100%; border-collapse: collapse; font-size:12px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                    <thead>
+                        <tr style="background:rgba(255,255,0,0.2); color:#FFFF00;">
+                            <th style="padding:10px; border:1px solid #333;">학번</th>
+                            <th style="padding:10px; border:1px solid #333;">성명</th>
+                            <th style="padding:10px; border:1px solid #333;">제출</th>
+                            <th style="padding:10px; border:1px solid #333;">평균점수</th>
+                            <th style="padding:10px; border:1px solid #333;">최종등급</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-stats-body" style="text-align:center;">
+                        <!-- JS로 렌더링 -->
+                    </tbody>
+                </table>
+            </div>
             
             <div style="margin-top:25px; display:flex; flex-direction:column; gap:10px;">
                 <button class="btn" style="background:#4CAF50; color:white;" onclick="downloadCSV()">🟢 평가 데이터 CSV 다운로드</button>
@@ -586,6 +604,9 @@
     <script>
         const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let currentUser = null;
+
+        // [서버 설정] 구글 스프레드시트 Apps Script URL 연동 완료
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbzB_tdxJkx8_pc7orbjpbAQXXk_Ey7KppmrfoQe6yePn1RIqeuh9AswhORZNaQ1pG7URg/exec"; 
 
         // 학생 정보 DB (성 제거하여 선택지와 일치시킴)
         const studentDB = {
@@ -847,11 +868,26 @@
                 timestamp: new Date().toISOString()
             };
 
+            // 1. 로컬 저장 (백업용)
             evaluations.push(evalData);
             localStorage.setItem('evaluations', JSON.stringify(evaluations));
 
-            alert('데이터가 서버에 실시간 저장되었습니다.');
+            // 2. 서버 전송 (구글 스프레드시트)
+            if (GOOGLE_SHEET_URL) {
+                fetch(GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Apps Script CORS 정책 대응
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(evalData)
+                }).then(() => {
+                    console.log("Server Sync Success");
+                }).catch(err => console.error("Server Sync Error:", err));
+            }
+
+            alert('데이터가 구글 서버와 로컬에 실시간 저장되었습니다.');
             resetForm();
+            updateDashboard(); // 제출 즉시 현황판 갱신
         }
 
         function resetForm() {
@@ -885,19 +921,56 @@
         }
 
         function updateDashboard() {
-            if (evaluations.length === 0) return;
+            const countDisplay = document.getElementById('submit-count');
+            const progress = document.getElementById('submit-progress');
+            const percentDisplay = document.getElementById('progress-percent');
+            const statsBody = document.getElementById('student-stats-body');
+            
+            // 제출 인원 파악 (중복 제거)
+            const submittedUsers = new Set(evaluations.map(e => e.evaluator));
+            const totalStudents = Object.keys(studentDB).length;
+            const submitCount = submittedUsers.size;
 
-            // 개인별 상세 결과 렌더링
-            renderIndividualResults();
+            countDisplay.innerText = submitCount;
+            const percent = (submitCount / totalStudents) * 100;
+            progress.style.width = percent + '%';
+            percentDisplay.innerText = Math.round(percent) + '%';
+
+            // 학생별 데이터 집계
+            let html = "";
+            Object.entries(studentDB).forEach(([id, name]) => {
+                // 이 학생이 받은 평가들 추출
+                const receivedEvals = evaluations.filter(e => e.target === name);
+                const avgScore = receivedEvals.length > 0 
+                    ? (receivedEvals.reduce((sum, e) => sum + e.total, 0) / receivedEvals.length).toFixed(1)
+                    : "0.0";
+                
+                const hasSubmitted = submittedUsers.has(name) ? "✅ 완료" : "❌ 미제출";
+                const grade = getGradeFromScore(parseFloat(avgScore));
+                const gradeColor = grade === 'A' ? '#00FF00' : (grade === 'I' ? '#666' : '#FFFF00');
+
+                html += `
+                    <tr style="border-bottom: 1px solid #333;">
+                        <td style="padding:10px; border:1px solid #333;">${id}</td>
+                        <td style="padding:10px; border:1px solid #333; font-weight:bold;">${name}</td>
+                        <td style="padding:10px; border:1px solid #333; color:${submittedUsers.has(name)?'#00FF00':'#ff4444'}">${hasSubmitted}</td>
+                        <td style="padding:10px; border:1px solid #333;">${avgScore}점</td>
+                        <td style="padding:10px; border:1px solid #333; font-weight:bold; color:${gradeColor}; font-size:14px;">${grade}</td>
+                    </tr>
+                `;
+            });
+            statsBody.innerHTML = html;
         }
-        // 등급 계산 로직
+
+        // 등급 산출 로직
         function getGradeFromScore(score) {
             if (score >= 12.0) return 'A';
             if (score >= 10.5) return 'B';
             if (score >= 8.5) return 'C';
             if (score >= 6.5) return 'D';
             if (score >= 4.5) return 'E';
-            return 'I';
+            if (score > 0) return 'I';
+            return '-';
         }
 
         // 리포트 개별 인쇄 함수
