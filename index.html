@@ -16,7 +16,9 @@
         }
 
         /* 보안용 화면 숨김 클래스 - 필수 */
-        .hidden { display: none !important; }
+        .hidden {
+            display: none !important;
+        }
 
         * {
             box-sizing: border-box;
@@ -25,7 +27,7 @@
         }
 
         body {
-            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('cherry_drone_header_bg.png');
+            background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)), url('cherry_drone_header_bg.png');
             background-attachment: fixed;
             background-size: cover;
             color: var(--text-color);
@@ -189,12 +191,13 @@
         }
 
         /* 체크 해제 시 감점 표시 스타일 */
-        .checklist-item input:not(:checked) + .checklist-text {
+        .checklist-item input:not(:checked)+.checklist-text {
             color: #ff4444 !important;
             text-decoration: line-through;
             opacity: 0.8;
         }
-        .checklist-item input:not(:checked) + .checklist-text::after {
+
+        .checklist-item input:not(:checked)+.checklist-text::after {
             content: " (미충족 감점)";
             font-size: 11px;
             font-weight: bold;
@@ -215,47 +218,88 @@
         }
 
         .header-bg {
-            width: 100%; height: 140px;
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('cherry_drone_header_bg.png');
-            background-size: cover; background-position: center; border-radius: 20px 20px 0 0;
-            display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
-            border-bottom: 2px solid #FFC0CB; box-shadow: 0 4px 15px rgba(255,192,203,0.3);
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('cherry_drone_header_bg.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #FFC0CB;
+            box-shadow: 0 4px 15px rgba(255, 192, 203, 0.3);
         }
+
         .header-bg h1 {
-            font-size: 20px; margin: 0; color: #fff; letter-spacing: 3px; font-weight: 800;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(255,192,203,0.5);
+            font-size: 20px;
+            margin: 0;
+            color: #fff;
+            letter-spacing: 3px;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7), 0 0 10px rgba(255, 192, 203, 0.5);
         }
-        #student-photo-container { text-align: center; margin: 25px 0; animation: fadeIn 0.5s ease; }
+
+        #student-photo-container {
+            text-align: center;
+            margin: 25px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
         #target-photo-img {
-            width: 130px; height: 130px; border-radius: 50%; border: 4px solid #FFFF00;
-            object-fit: cover; box-shadow: 0 0 20px rgba(255,255,0,0.4);
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 4px solid #FFFF00;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.4);
             transition: all 0.3s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-        <style>
-            .side-image {
-                position: fixed;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 150px; /* 크기를 조금 키움 */
-                opacity: 0.3; /* 배경과 조화롭게 투명도 조정 */
-                pointer-events: none;
-                z-index: 0;
-                filter: grayscale(30%);
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
             }
-            .side-image-left { left: 10px; }
-            .side-image-right { right: 10px; }
-        </style>
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <style>
+        .side-image {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 150px;
+            /* 크기를 조금 키움 */
+            opacity: 0.3;
+            /* 배경과 조화롭게 투명도 조정 */
+            pointer-events: none;
+            z-index: 0;
+            filter: grayscale(30%);
+        }
+
+        .side-image-left {
+            left: 10px;
+        }
+
+        .side-image-right {
+            right: 10px;
+        }
+    </style>
     <script>
         // 자동 재생 시도 및 사용자 인터랙션 대기
         function tryAutoplay() {
             const audio = document.getElementById('audio-bgm');
             const status = document.getElementById('bgm-status');
-            
+
             // 재생 시도 (브라우저 정책에 따라 거부될 수 있음)
             const playPromise = audio.play();
-            
+
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     status.innerText = "ON (Playing)";
@@ -282,7 +326,7 @@
             const loginScreen = document.getElementById('login-screen');
             const evalScreen = document.getElementById('eval-screen');
             const statsScreen = document.getElementById('stats-screen');
-            
+
             if (loginScreen) loginScreen.classList.remove('hidden');
             if (evalScreen) evalScreen.classList.add('hidden');
             if (statsScreen) statsScreen.classList.add('hidden');
@@ -335,9 +379,9 @@
 
     <!-- 실시간 한국 시간 표시 -->
     <div id="current-time-view" class="time-display">KST: --:--:--</div>
-        <!-- 좌우 장식 이미지 (현재 폴더에 있는 파일로 경로 수정) -->
-        <img src="cherry_drone_header_bg.png" class="side-image side-image-left" alt="벚꽃">
-        <img src="drone_hero.png" class="side-image side-image-right" alt="드론">
+    <!-- 좌우 장식 이미지 (현재 폴더에 있는 파일로 경로 수정) -->
+    <img src="cherry_drone_header_bg.png" class="side-image side-image-left" alt="벚꽃">
+    <img src="drone_hero.png" class="side-image side-image-right" alt="드론">
 
     <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
         <span>🎵 웅장한 비행 BGM</span>
@@ -350,18 +394,22 @@
 
     <div class="container">
         <!-- 다음 과제 안내 배너 (클릭 가능) -->
-        <div id="next-topic-banner" onclick="displayGuide()" style="cursor: pointer; background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 10px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2); transition: all 0.3s ease;">
+        <div id="next-topic-banner" onclick="displayGuide()"
+            style="cursor: pointer; background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 10px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2); transition: all 0.3s ease;">
             📢 다음 과제 눌러주세요.
         </div>
-        
+
         <!-- 수행평가 상세 가이드 영역 (로그인 시 자동으로 닫기 위해 초기엔 hidden) -->
-        <div id="guide-modal" class="hidden" style="background: rgba(0,0,0,0.9); border: 1px solid #FFFF00; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,255,0,0.2); animation: fadeIn 0.4s ease;">
+        <div id="guide-modal" class="hidden"
+            style="background: rgba(0,0,0,0.9); border: 1px solid #FFFF00; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,255,0,0.2); animation: fadeIn 0.4s ease;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                 <h3 style="color: #FFFF00; margin: 0; font-size: 18px;">📋 [수행평가 가이드]<br>2박 3일 차박/캠핑 랜선 여행 영상 제작</h3>
-                <button onclick="displayGuide()" style="background:none; border:none; color:#FFFF00; font-size:24px; cursor:pointer;">&times;</button>
+                <button onclick="displayGuide()"
+                    style="background:none; border:none; color:#FFFF00; font-size:24px; cursor:pointer;">&times;</button>
             </div>
-            
-            <p style="color: #FFA500; font-weight: bold; font-size: 14px; border-left: 4px solid #FFFF00; padding-left: 10px; margin-bottom: 20px;">
+
+            <p
+                style="color: #FFA500; font-weight: bold; font-size: 14px; border-left: 4px solid #FFFF00; padding-left: 10px; margin-bottom: 20px;">
                 "AI가 만든 뻔한 영상은 NO! 너만의 갬성과 데이터를 담아라!"
             </p>
 
@@ -396,15 +444,16 @@
 
         <!-- 1단계: 2중 보안 로그인 화면 -->
         <div id="login-screen" class="card">
-            <img src="drone_hero.png" style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
+            <img src="drone_hero.png"
+                style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
             <h1 style="font-size: 20px;">🛡️ 안티그래비티<br>2중 보안 로그인</h1>
-            
+
             <!-- 로그인 시 QR 접속 안내 -->
             <div style="text-align:center; margin-bottom: 20px;">
                 <p style="font-size:11px; color:#aaa; margin-bottom:5px;">📱 스마트폰 카메라로 QR을 찍어보세요!</p>
                 <div id="login-qr" class="qr-section"></div>
             </div>
-            
+
             <div id="login-step-1">
                 <div class="input-group">
                     <label for="student-id">1단계: 학번을 입력하세요</label>
@@ -414,24 +463,28 @@
             </div>
 
             <div id="login-step-2" class="hidden">
-                <div style="background:#000; padding:15px; border-radius:10px; border:1px solid #333; margin-bottom:20px;">
+                <div
+                    style="background:#000; padding:15px; border-radius:10px; border:1px solid #333; margin-bottom:20px;">
                     <p style="font-size:14px; color:#FFFF00; margin-bottom:5px;">[Security Challenge]</p>
                     <p id="binary-hint" style="font-size:13px; color:#fff;"></p>
                 </div>
                 <div class="input-group">
                     <label for="binary-code">2단계: 8비트 2진수로 변환하세요</label>
-                    <input type="text" id="binary-code" placeholder="예: 00000110" maxlength="8" style="letter-spacing: 5px; text-align: center;">
+                    <input type="text" id="binary-code" placeholder="예: 00000110" maxlength="8"
+                        style="letter-spacing: 5px; text-align: center;">
                 </div>
                 <button class="btn" onclick="verifyLogin()">최종 보안 해제</button>
             </div>
-            
+
             <p style="text-align: center; font-size: 11px; color: #666; margin-top: 20px;">정보보안 및 드론 교과 융합 시스템</p>
         </div>
 
         <div id="eval-screen" class="card hidden">
             <!-- 본인 프로필 표시 섹션 -->
-            <div id="evaluator-profile-section" style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: rgba(255,255,0,0.1); border-radius: 15px; border: 1px solid #FFFF00;">
-                <img id="my-profile-img" src="drone_hero.png" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #FFFF00; object-fit: cover;">
+            <div id="evaluator-profile-section"
+                style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: rgba(255,255,0,0.1); border-radius: 15px; border: 1px solid #FFFF00;">
+                <img id="my-profile-img" src="drone_hero.png"
+                    style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #FFFF00; object-fit: cover;">
                 <div style="text-align: left;">
                     <span id="my-name-display" style="font-weight: bold; color: #FFFF00;"></span> 님, 환영합니다!<br>
                     <span style="font-size: 11px; color: #ccc;">오늘도 동료의 성장을 응원해 주세요 🚀</span>
@@ -439,7 +492,8 @@
             </div>
 
             <!-- 선생님의 응원 문구 -->
-            <div style="text-align: center; color: #FFFF00; font-style: italic; font-size: 14px; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; line-height: 1.6;">
+            <div
+                style="text-align: center; color: #FFFF00; font-style: italic; font-size: 14px; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; line-height: 1.6;">
                 "지금의 부족함은 너희가 더 높이 점프하기 위해<br>잠시 굽히고 있는 무릎과 같다"
             </div>
             <img src="drone_hero.png"
@@ -471,17 +525,23 @@
                 </select>
                 <div id="student-photo-container" class="hidden">
                     <img id="target-photo-img" src="">
-                    <p id="target-name-display" style="color: #FFFF00; font-weight: bold; margin-top: 10px; font-size: 18px;"></p>
+                    <p id="target-name-display"
+                        style="color: #FFFF00; font-weight: bold; margin-top: 10px; font-size: 18px;"></p>
                 </div>
             </div>
 
             <label>3. 필수 체크리스트 (항목 누락 시 등급 자동 하락)</label>
             <div id="checklist" style="margin-bottom: 25px;">
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">1) 영상 길이 15분 준수</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">2) 돈 계산/미래 비교 자막 포함</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">3) 자막/음악 조화</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">4) 신선한 아이디어</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> <span class="checklist-text">5) 제출 시간 엄수</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                    <span class="checklist-text">1) 영상 길이 15분 준수</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                    <span class="checklist-text">2) 돈 계산/미래 비교 자막 포함</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                    <span class="checklist-text">3) 자막/음악 조화</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                    <span class="checklist-text">4) 신선한 아이디어</span></label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                    <span class="checklist-text">5) 제출 시간 엄수</span></label>
             </div>
 
             <label>4. 최종 종합 등급 (체크리스트에 따라 자동 결정)</label>
@@ -496,40 +556,48 @@
                 <!-- ... 다른 등급들 (축소 표시) ... -->
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-b" value="11" onchange="calculateScore()">
-                    <label for="grade-b" class="grade-label"><span class="grade-name">B</span><span class="grade-score">11점</span></label>
+                    <label for="grade-b" class="grade-label"><span class="grade-name">B</span><span
+                            class="grade-score">11점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-c" value="9" onchange="calculateScore()">
-                    <label for="grade-c" class="grade-label"><span class="grade-name">C</span><span class="grade-score">9점</span></label>
+                    <label for="grade-c" class="grade-label"><span class="grade-name">C</span><span
+                            class="grade-score">9점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-d" value="7" onchange="calculateScore()">
-                    <label for="grade-d" class="grade-label"><span class="grade-name">D</span><span class="grade-score">7점</span></label>
+                    <label for="grade-d" class="grade-label"><span class="grade-name">D</span><span
+                            class="grade-score">7점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-e" value="5" onchange="calculateScore()">
-                    <label for="grade-e" class="grade-label"><span class="grade-name">E</span><span class="grade-score">5점</span></label>
+                    <label for="grade-e" class="grade-label"><span class="grade-name">E</span><span
+                            class="grade-score">5점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-i" value="3" onchange="calculateScore()">
-                    <label for="grade-i" class="grade-label"><span class="grade-name">I</span><span class="grade-score">3점</span></label>
+                    <label for="grade-i" class="grade-label"><span class="grade-name">I</span><span
+                            class="grade-score">3점</span></label>
                 </div>
             </div>
 
             <div id="grade-info" class="grade-desc">등급을 선택하면 기준이 표시됩니다.</div>
 
             <div class="input-group">
-                <label for="video-topic" style="color: #FFFF00; line-height: 1.5;">5. 대상학생의 영상주제 (구체적으로 작성)<br><span style="color: #ff4444; font-size: 13px;">※ 틀리면 친구 영상을 안 보았다는 의미로 본인 점수가 하락합니다.</span></label>
+                <label for="video-topic" style="color: #FFFF00; line-height: 1.5;">5. 대상학생의 영상주제 (구체적으로 작성)<br><span
+                        style="color: #ff4444; font-size: 13px;">※ 틀리면 친구 영상을 안 보았다는 의미로 본인 점수가 하락합니다.</span></label>
                 <input type="text" id="video-topic" placeholder="예: 국내 캠핑(차박) 2박 3일 소개하기">
             </div>
 
             <div class="input-group">
                 <label for="feedback">7. 동료 피드백 & AI 추천</label>
                 <textarea id="feedback" rows="3" placeholder="주제와 점수를 기반으로 AI 추천 의견을 받아보세요"></textarea>
-                <button class="btn btn-secondary" onclick="generateAIFeedback()" style="margin-top:10px; font-size:14px;">🤖 AI 피드백 생성하기</button>
+                <button class="btn btn-secondary" onclick="generateAIFeedback()"
+                    style="margin-top:10px; font-size:14px;">🤖 AI 피드백 생성하기</button>
             </div>
 
-            <div class="input-group" style="background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; border: 1px dashed #555;">
+            <div class="input-group"
+                style="background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; border: 1px dashed #555;">
                 <label>⭐ 내가 생각하는 동료의 주관적 등급</label>
                 <div style="display: flex; justify-content: space-between; margin-top: 10px;">
                     <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="A"> A</label>
@@ -552,7 +620,8 @@
             <h2>📊 상세 평가 결과 (최종)</h2>
 
             <!-- 실시간 제출 현황 게이지 -->
-            <div style="background: rgba(255,255,0,0.05); padding: 15px; border-radius: 15px; border: 1px dashed #FFFF00; margin-bottom: 20px;">
+            <div
+                style="background: rgba(255,255,0,0.05); padding: 15px; border-radius: 15px; border: 1px dashed #FFFF00; margin-bottom: 20px;">
                 <label style="margin-bottom:5px;">🔥 학급 제출 현황 (<span id="submit-count">0</span> / 6명 완료)</label>
                 <div class="progress-container">
                     <div id="submit-progress" class="progress-bar"></div>
@@ -564,7 +633,8 @@
 
             <!-- 학생별 실시간 성적 현황판 -->
             <div id="student-stats-container" style="margin-bottom:20px;">
-                <table style="width:100%; border-collapse: collapse; font-size:12px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
+                <table
+                    style="width:100%; border-collapse: collapse; font-size:12px; background:rgba(255,255,255,0.05); border-radius:10px; overflow:hidden;">
                     <thead>
                         <tr style="background:rgba(255,255,0,0.2); color:#FFFF00;">
                             <th style="padding:10px; border:1px solid #333;">학번</th>
@@ -584,20 +654,24 @@
             <div id="student-stats-list" style="margin-top:20px; display: flex; flex-direction: column; gap: 20px;">
                 <!-- JS (renderIndividualResults)로 렌더링 됩니다 -->
             </div>
-            
-            
+
+
             <div style="margin-top:25px; display:flex; flex-direction:column; gap:10px;">
-                <button class="btn" style="background:#4CAF50; color:white;" onclick="downloadCSV()">🟢 평가 데이터 CSV 다운로드</button>
-                <button class="btn" style="background:#2196F3; color:white;" onclick="syncDataToServer()">📂 기존 데이터 구글 시트로 전송 (동기화)</button>
-                
+                <button class="btn" style="background:#4CAF50; color:white;" onclick="downloadCSV()">🟢 평가 데이터 CSV
+                    다운로드</button>
+                <button class="btn" style="background:#2196F3; color:white;" onclick="syncDataToServer()">📂 기존 데이터 구글
+                    시트로 전송 (동기화)</button>
+
                 <!-- 관리용 QR (공유용) -->
-                <div style="text-align: center; margin: 15px 0; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                <div
+                    style="text-align: center; margin: 15px 0; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
                     <div id="admin-qr" style="display:flex; justify-content:center;"></div>
                     <p style="font-size:10px; color:#aaa; margin-top:5px;">[사이트 접속 QR 코드]</p>
                 </div>
 
                 <p style="text-align: center; font-size: 11px; color: #666;">※ 모든 데이터는 브라우저에 실시간 자동 저장됩니다.</p>
-                <button class="btn btn-secondary" onclick="clearAllData()" style="color:#ff4444; border-color:#ff4444; font-size:14px;">🔴 데이터 전체 삭제 (초기화)</button>
+                <button class="btn btn-secondary" onclick="clearAllData()"
+                    style="color:#ff4444; border-color:#ff4444; font-size:14px;">🔴 데이터 전체 삭제 (초기화)</button>
                 <button class="btn btn-secondary" onclick="backToEval()">닫기</button>
             </div>
         </div>
@@ -613,7 +687,7 @@
         let currentUser = null;
 
         // [서버 설정] 구글 스프레드시트 Apps Script 최종 연동 (주소 지정형 완료)
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycby4lCYrauuw2hhEdxbUJzBp93uxt-GvpHTAavrsQBZykUYdkW3wkvyZUZ3etD68eJYX/exec"; 
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycby4lCYrauuw2hhEdxbUJzBp93uxt-GvpHTAavrsQBZykUYdkW3wkvyZUZ3etD68eJYX/exec";
 
         // 학생 정보 DB (6인 체제: 학생 5명 + 선생님)
         const studentDB = {
@@ -661,7 +735,7 @@
             }
 
             const id = document.getElementById('student-id').value;
-            
+
             // 관리자 마스터 키 체크 (1983)
             if (id === "1983") {
                 alert('관리자 모드로 접속합니다.');
@@ -717,7 +791,7 @@
             const evalScreen = document.getElementById('eval-screen');
             const statsScreen = document.getElementById('stats-screen');
             const guideModal = document.getElementById('guide-modal');
-            
+
             if (loginScreen) loginScreen.classList.remove('hidden');
             if (evalScreen) evalScreen.classList.add('hidden');
             if (statsScreen) statsScreen.classList.add('hidden');
@@ -739,18 +813,18 @@
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('eval-screen').classList.remove('hidden');
-            
+
             // 본인 정보 상단 표시
             document.getElementById('my-name-display').innerText = userName;
             const myImg = document.getElementById('my-profile-img');
             myImg.src = photoMap[userName] || "drone_hero.png";
-            myImg.onerror = function() { this.src = 'drone_hero.png'; };
+            myImg.onerror = function () { this.src = 'drone_hero.png'; };
 
             // 평가자 자동 선택 정책 수정 (선생님/학생 구분)
             const evalSelect = document.getElementById('evaluator-name');
             setTimeout(() => {
                 if (userName === "선생님") {
-                    evalSelect.value = "선생님"; 
+                    evalSelect.value = "선생님";
                     evalSelect.disabled = false;
                 } else {
                     evalSelect.value = userName;
@@ -774,7 +848,7 @@
 
             if (name) {
                 img.src = photoMap[name] || "drone_hero.png";
-                img.onerror = function() { this.src = 'drone_hero.png'; };
+                img.onerror = function () { this.src = 'drone_hero.png'; };
                 nameDisplay.innerText = `🎥 대상: ${name}`;
                 container.classList.remove('hidden');
             } else {
@@ -935,7 +1009,7 @@
             const progress = document.getElementById('submit-progress');
             const percentDisplay = document.getElementById('progress-percent');
             const statsBody = document.getElementById('student-stats-body');
-            
+
             // 제출 인원 파악 (중복 제거)
             const submittedUsers = new Set(evaluations.map(e => e.evaluator));
             const totalStudents = 6; // 선생님 요청 반영: 학생 5명 + 선생님 평가 1명
@@ -951,10 +1025,10 @@
             Object.entries(studentDB).forEach(([id, name]) => {
                 // 이 학생이 받은 평가들 추출
                 const receivedEvals = evaluations.filter(e => e.target === name);
-                const avgScore = receivedEvals.length > 0 
+                const avgScore = receivedEvals.length > 0
                     ? (receivedEvals.reduce((sum, e) => sum + e.total, 0) / receivedEvals.length).toFixed(1)
                     : "0.0";
-                
+
                 const hasSubmitted = submittedUsers.has(name) ? "✅ 완료" : "❌ 미제출";
                 const grade = getGradeFromScore(parseFloat(avgScore));
                 const gradeColor = grade === 'A' ? '#00FF00' : (grade === 'I' ? '#666' : '#FFFF00');
@@ -963,14 +1037,14 @@
                     <tr style="border-bottom: 1px solid #333;">
                         <td style="padding:10px; border:1px solid #333;">${id}</td>
                         <td style="padding:10px; border:1px solid #333; font-weight:bold;">${name}</td>
-                        <td style="padding:10px; border:1px solid #333; color:${submittedUsers.has(name)?'#00FF00':'#ff4444'}">${hasSubmitted}</td>
+                        <td style="padding:10px; border:1px solid #333; color:${submittedUsers.has(name) ? '#00FF00' : '#ff4444'}">${hasSubmitted}</td>
                         <td style="padding:10px; border:1px solid #333;">${avgScore}점</td>
                         <td style="padding:10px; border:1px solid #333; font-weight:bold; color:${gradeColor}; font-size:14px;">${grade}</td>
                     </tr>
                 `;
             });
             statsBody.innerHTML = html;
-            
+
             // 상세 차트 카드 렌더링 호출 추가
             renderIndividualResults();
         }
@@ -1016,14 +1090,14 @@
 
             evaluations.forEach(e => {
                 if (!summary[e.target]) {
-                    summary[e.target] = { total: 0, count: 0, feedbacks: [], topics: [], checks: [0,0,0,0,0] };
+                    summary[e.target] = { total: 0, count: 0, feedbacks: [], topics: [], checks: [0, 0, 0, 0, 0] };
                 }
                 summary[e.target].total += e.total;
                 summary[e.target].count += 1;
                 if (e.feedback) summary[e.target].feedbacks.push(e.feedback);
                 if (e.topic) summary[e.target].topics.push(e.topic);
                 if (e.checks) {
-                    e.checks.forEach((val, idx) => { if(val) summary[e.target].checks[idx]++; });
+                    e.checks.forEach((val, idx) => { if (val) summary[e.target].checks[idx]++; });
                 }
             });
 
@@ -1034,12 +1108,12 @@
                 const avg = data.total / data.count;
                 const finalGrade = getGradeFromScore(avg);
                 const photo = photoMap[student] || "drone_hero.png";
-                
+
                 // 배지 자동 생성
                 let badges = '';
-                if(finalGrade === 'A') badges += '<span class="badge badge-pilot">🏆 Best Pilot</span>';
-                if(data.checks[3]/data.count >= 0.8) badges += '<span class="badge badge-idea">🎨 Idea Master</span>';
-                if(data.count >= 3) badges += '<span class="badge badge-effort">⚡ High Effort</span>';
+                if (finalGrade === 'A') badges += '<span class="badge badge-pilot">🏆 Best Pilot</span>';
+                if (data.checks[3] / data.count >= 0.8) badges += '<span class="badge badge-idea">🎨 Idea Master</span>';
+                if (data.count >= 3) badges += '<span class="badge badge-effort">⚡ High Effort</span>';
 
                 const cardId = `chart-${student.replace(/\s/g, '')}`;
                 const card = document.createElement('div');
@@ -1087,7 +1161,7 @@
                         labels: ['길이', '자막', '조화', '아이디어', '시간'],
                         datasets: [{
                             label: '수행률 (%)',
-                            data: data.checks.map(c => (c/data.count)*100),
+                            data: data.checks.map(c => (c / data.count) * 100),
                             backgroundColor: 'rgba(255, 255, 0, 0.2)',
                             borderColor: '#FFFF00',
                             pointBackgroundColor: '#FFFF00'
@@ -1107,7 +1181,7 @@
                     }
                 });
             }
-            
+
             if (Object.keys(summary).length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">데이터가 없습니다.</p>';
             }
@@ -1157,7 +1231,7 @@
             for (const data of evaluations) {
                 try {
                     if (!data.date) data.date = new Date().toLocaleDateString('ko-KR');
-                    
+
                     await fetch(GOOGLE_SHEET_URL, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -1178,13 +1252,13 @@
             const currentUrl = window.location.href;
             const qrSize = "150x150";
             const qrImageUrl = `https://chart.googleapis.com/chart?chs=${qrSize}&cht=qr&chl=${encodeURIComponent(currentUrl)}&choe=UTF-8`;
-            
+
             // 로그인 화면 QR
             const loginQR = document.getElementById('login-qr');
             if (loginQR) {
                 loginQR.innerHTML = `<img src="${qrImageUrl}" alt="Login QR" style="border: 5px solid white; border-radius: 10px;">`;
             }
-            
+
             // 관리자 화면 QR
             const adminQR = document.getElementById('admin-qr');
             if (adminQR) {
@@ -1192,7 +1266,7 @@
             }
         }
 
-        window.onload = function() {
+        window.onload = function () {
             initSystem();
             generateQRCodes();
             tryAutoplay();
