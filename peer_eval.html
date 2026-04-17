@@ -275,13 +275,12 @@
         }
     </style>
     <script>
-        // Enforce login screen on page load
-        function enforceLogin() {
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('eval-screen').classList.add('hidden');
+        // 처음 접속 시 평가 화면이 바로 나오도록 설정
+        function enforceEvalScreen() {
+            document.getElementById('eval-screen').classList.remove('hidden');
             document.getElementById('stats-screen').classList.add('hidden');
         }
-        window.addEventListener('load', enforceLogin);
+        window.addEventListener('load', enforceEvalScreen);
     </script>
     <style>
         @media (max-width: 480px) {
@@ -327,27 +326,15 @@
         <div id="next-topic-banner" style="background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2);">
             📢 [다음 주제] 5월 1일: 국내 캠핑(차박) 2박 3일 소개하기
         </div>
-        <!-- 1단계: 암호 입력 화면 -->
-        <div id="login-screen" class="card">
-            <img src="drone_hero.png"
-                style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
-            <h1>🔐 안티그래비티<br>동료평가 시스템</h1>
-            <div class="input-group">
-                <label for="access-password">시스템 접속 암호를 입력하세요</label>
-                <input type="password" id="access-password" placeholder="Password Required">
-            </div>
-            <button class="btn" onclick="checkPassword()">시스템 접속</button>
-            <p style="text-align: center; font-size: 12px; color: #666; margin-top: 20px;">암호: 1983!!</p>
-        </div>
 
-        <div id="eval-screen" class="card hidden">
+        <div id="eval-screen" class="card">
             <img src="drone_hero.png"
                 style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
             <h2>🎥 동료평가 입력</h2>
 
             <div class="input-group">
                 <label for="evaluator-name">1. 본인의 이름을 선택하세요 (필수)</label>
-                <select id="evaluator-name">
+                <select id="evaluator-name" onchange="filterTargetList()">
                     <option value="" disabled selected>평가자 본인 선택</option>
                     <option value="종학">종학</option>
                     <option value="예담">예담</option>
@@ -432,8 +419,8 @@
             <div class="live-score">실시간 계산 점수: <span id="total-score">0</span>점</div>
 
             <button class="btn" onclick="submitEvaluation()">평가 제출하기</button>
-            <p style="text-align: center; color: #FF4444; font-size: 11px; margin-top: 15px;">※ 통계 화면은 관리자 암학 확인 후 전용 페이지로 이동합니다.</p>
-            <button class="btn btn-secondary" onclick="showStats()">관리자 통계 보기 (보안)</button>
+            <p style="text-align: center; color: #666; font-size: 11px; margin-top: 15px;">※ 통계 결과는 관리자만 확인 가능합니다.</p>
+            <button class="btn btn-secondary" onclick="showStats()">관리자 통계 보기</button>
         </div>
 
         <!-- 3단계: 통계 및 관리 화면 -->
@@ -470,6 +457,29 @@
             "5": "E: 주도적 참여 없음, 유의미한 결과물 없음.",
             "3": "I: 기본점수. 과제 제출했으나 결과물 없음."
         };
+
+        // 본인 평가 방지: 평가자 선택 시 대상 리스트에서 본인 제외
+        function filterTargetList() {
+            const evaluator = document.getElementById('evaluator-name').value;
+            const targetSelect = document.getElementById('target-name');
+            const options = targetSelect.options;
+
+            for (let i = 0; i < options.length; i++) {
+                if (options[i].value === evaluator) {
+                    options[i].disabled = true;
+                    options[i].style.display = 'none';
+                } else {
+                    options[i].disabled = false;
+                    options[i].style.display = 'block';
+                }
+            }
+            
+            // 만약 현재 선택된 대상이 본인이라면 선택 해제
+            if (targetSelect.value === evaluator) {
+                targetSelect.selectedIndex = 0;
+                updateStudentPhoto();
+            }
+        }
 
         // ... (중략 - updateStudentPhoto 생략) ...
 
