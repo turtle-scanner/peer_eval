@@ -717,16 +717,18 @@
             myImg.src = photoMap[userName] || "drone_hero.png";
             myImg.onerror = function() { this.src = 'drone_hero.png'; };
 
-            // 평가자 자동 선택 정책 수정 (관리자 모드 대응)
+            // 평가자 자동 선택 정책 수정 (관리자 모드 대응 강화)
             const evalSelect = document.getElementById('evaluator-name');
-            if (userName === "관리자") {
-                evalSelect.value = "관리자"; // 관리자로 자동 선택
-                evalSelect.disabled = false; // 필요 시 다른 이름으로 변경 가능하도록 활성화
-            } else {
-                evalSelect.value = userName;
-                evalSelect.disabled = true; // 학생은 자기 이름 고정
-            }
-            filterTargetList();
+            setTimeout(() => {
+                if (userName === "관리자") {
+                    evalSelect.value = "관리자"; 
+                    evalSelect.disabled = false;
+                } else {
+                    evalSelect.value = userName;
+                    evalSelect.disabled = true;
+                }
+                filterTargetList();
+            }, 100); // 0.1초 지연 실행으로 브라우저 렌더링 보장
         }
 
         // 평가 대상 동료 사진 업데이트
@@ -804,11 +806,14 @@
         }
 
         function submitEvaluation() {
-            const evaluator = document.getElementById('evaluator-name').value;
+            let evaluator = document.getElementById('evaluator-name').value;
             const target = document.getElementById('target-name').value;
             const topic = document.getElementById('video-topic').value;
             const score = parseFloat(document.getElementById('total-score').innerText);
             const feedback = document.getElementById('feedback').value;
+
+            // 관리자 긴급 예외 처리 (목록 미선택 시에도 본인이 관리자면 통과)
+            if (!evaluator && currentUser === "관리자") evaluator = "관리자";
 
             if (!evaluator) { alert('본인의 이름을 먼저 선택해 주세요.'); return; }
             if (!target) { alert('평가 대상자를 선택해 주세요.'); return; }
