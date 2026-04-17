@@ -450,7 +450,7 @@
                 <label for="evaluator-name">1. 본인의 이름을 선택하세요 (필수)</label>
                 <select id="evaluator-name" onchange="filterTargetList()">
                     <option value="" disabled selected>평가자 본인 선택</option>
-                    <option value="관리자">관리자(선생님)</option>
+                    <option value="선생님">선생님</option>
                     <option value="종학">종학</option>
                     <option value="예담">예담</option>
                     <option value="보성">보성</option>
@@ -553,7 +553,7 @@
 
             <!-- 실시간 제출 현황 게이지 -->
             <div style="background: rgba(255,255,0,0.05); padding: 15px; border-radius: 15px; border: 1px dashed #FFFF00; margin-bottom: 20px;">
-                <label style="margin-bottom:5px;">🔥 학급 제출 현황 (<span id="submit-count">0</span> / 5명 완료)</label>
+                <label style="margin-bottom:5px;">🔥 학급 제출 현황 (<span id="submit-count">0</span> / 6명 완료)</label>
                 <div class="progress-container">
                     <div id="submit-progress" class="progress-bar"></div>
                     <div id="progress-percent" class="progress-text">0%</div>
@@ -582,6 +582,7 @@
             
             <div style="margin-top:25px; display:flex; flex-direction:column; gap:10px;">
                 <button class="btn" style="background:#4CAF50; color:white;" onclick="downloadCSV()">🟢 평가 데이터 CSV 다운로드</button>
+                <button class="btn" style="background:#2196F3; color:white;" onclick="syncDataToServer()">📂 기존 데이터 구글 시트로 전송 (동기화)</button>
                 
                 <!-- 관리용 QR (공유용) -->
                 <div style="text-align: center; margin: 15px 0; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
@@ -605,11 +606,12 @@
         const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let currentUser = null;
 
-        // [서버 설정] 구글 스프레드시트 Apps Script URL 최종 연동 완료
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxCoh1dIAAE1fd-xcx6RrZjsXoTx9eG2cKzArYmg52dsBZHiZew1QWSprWO4AxyaOgmQw/exec"; 
+        // [서버 설정] 구글 스프레드시트 Apps Script 최종 연동 (시트 연결형)
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbwMLEThat_yfWdpbLAbp-j00OhYtx2bm_oBv68p70lzzfNegDyql6QgdZQSN7oXneGT/exec"; 
 
-        // 학생 정보 DB (성 제거하여 선택지와 일치시킴)
+        // 학생 정보 DB (6인 체제: 학생 5명 + 선생님)
         const studentDB = {
+            "관리자": "선생님",
             "3606": "정욱",
             "3507": "종학",
             "3517": "우민",
@@ -657,7 +659,7 @@
             // 관리자 마스터 키 체크 (1983)
             if (id === "1983") {
                 alert('관리자 모드로 접속합니다.');
-                currentUser = "관리자";
+                currentUser = "선생님";
                 showEvalScreen(currentUser);
                 return;
             }
@@ -738,11 +740,11 @@
             myImg.src = photoMap[userName] || "drone_hero.png";
             myImg.onerror = function() { this.src = 'drone_hero.png'; };
 
-            // 평가자 자동 선택 정책 수정 (관리자 모드 대응 강화)
+            // 평가자 자동 선택 정책 수정 (선생님/학생 구분)
             const evalSelect = document.getElementById('evaluator-name');
             setTimeout(() => {
-                if (userName === "관리자") {
-                    evalSelect.value = "관리자"; 
+                if (userName === "선생님") {
+                    evalSelect.value = "선생님"; 
                     evalSelect.disabled = false;
                 } else {
                     evalSelect.value = userName;
@@ -834,8 +836,8 @@
             const score = parseFloat(document.getElementById('total-score').innerText);
             const feedback = document.getElementById('feedback').value;
 
-            // 관리자 긴급 예외 처리 (목록 미선택 시에도 본인이 관리자면 통과)
-            if (!evaluator && currentUser === "관리자") evaluator = "관리자";
+            // 관리자 긴급 예외 처리 (목록 미선택 시에도 본인이 선생님이면 통과)
+            if (!evaluator && currentUser === "선생님") evaluator = "선생님";
 
             if (!evaluator) { alert('본인의 이름을 먼저 선택해 주세요.'); return; }
             if (!target) { alert('평가 대상자를 선택해 주세요.'); return; }
@@ -858,6 +860,7 @@
             document.querySelectorAll('#checklist input').forEach(ck => checkList.push(ck.checked));
 
             const evalData = {
+                date: new Date().toLocaleDateString('ko-KR'), // 날짜 식별용 (예: 2024. 4. 19.)
                 evaluator: evaluator,
                 target: target,
                 topic: topic,
@@ -929,7 +932,7 @@
             
             // 제출 인원 파악 (중복 제거)
             const submittedUsers = new Set(evaluations.map(e => e.evaluator));
-            const totalStudents = Object.keys(studentDB).length;
+            const totalStudents = 6; // 선생님 요청 반영: 학생 5명 + 선생님 평가 1명
             const submitCount = submittedUsers.size;
 
             countDisplay.innerText = submitCount;
