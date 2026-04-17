@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 드론콘텐츠제작 동료평가 비밀 투표 시스템</title>
+    <title>DRONE CONTENTS PRODUCTION - Peer Evaluation System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -276,6 +276,7 @@
         window.addEventListener('load', () => {
             initSystem();
             tryAutoplay();
+            generateQRCodes(); // QR 코드 생성 복구
         });
     </script>
     <style>
@@ -333,14 +334,49 @@
     </audio>
 
     <div class="container">
-        <!-- 상단 고정 배경 헤더 -->
-        <div class="header-bg">
-            <h1>🛡️ ANTI GRAVITY DRONE SYSTEM</h1>
+        <!-- 다음 과제 안내 배너 (클릭 가능) -->
+        <div id="next-topic-banner" onclick="displayGuide()" style="cursor: pointer; background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 10px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2); transition: all 0.3s ease;">
+            📢 다음 과제 눌러주세요.
+        </div>
+        
+        <!-- 수행평가 상세 가이드 영역 (로그인 시 자동으로 닫기 위해 초기엔 hidden) -->
+        <div id="guide-modal" class="hidden" style="background: rgba(0,0,0,0.9); border: 1px solid #FFFF00; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 0 30px rgba(255,255,0,0.2); animation: fadeIn 0.4s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                <h3 style="color: #FFFF00; margin: 0; font-size: 18px;">📋 [수행평가 가이드]<br>2박 3일 차박/캠핑 랜선 여행 영상 제작</h3>
+                <button onclick="displayGuide()" style="background:none; border:none; color:#FFFF00; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            
+            <p style="color: #FFA500; font-weight: bold; font-size: 14px; border-left: 4px solid #FFFF00; padding-left: 10px; margin-bottom: 20px;">
+                "AI가 만든 뻔한 영상은 NO! 너만의 갬성과 데이터를 담아라!"
+            </p>
+
+            <div style="font-size: 13px; line-height: 1.6; color: #eee;">
+                <div style="margin-bottom: 20px;">
+                    <strong style="color: #FFFF00; font-size: 15px;">1. 영상 구성의 정석 (서론-본론-결론-하이라이트)</strong><br>
+                    단순히 영상을 이어 붙이는 것이 아니라, 시청자가 끝까지 보게 만드는 '우상향' 구조를 만드세요.<br>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li><strong>서론(Intro):</strong> 떠나기 전의 설렘, 왜 이 장소를 골랐는가?</li>
+                        <li><strong>본론(Body):</strong> 1일 차부터 3일 차까지의 리얼한 캠핑 스토리</li>
+                        <li><strong>하이라이트(Highlight):</strong> 이 영상의 백미! 가장 결정적인 순간</li>
+                        <li><strong>음식&장소(Main):</strong> 캠핑의 꽃! 상세한 장소 정보 제공</li>
+                        <li><strong>결론(Outro):</strong> 여행 소감, 총 예산 정산 및 마무리</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <strong style="color: #FFFF00; font-size: 15px;">2. 필수 데이터: 100만 원의 마법 (예산 편성)</strong><br>
+                    총예산 100만 원 내에서 시각화 필수 (그래프 사용 권장):<br>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li>장소 대여료, 식비, 교통비, 장비 대여, 기타 현지 체험 활동비 등</li>
+                    </ul>
+                    <span style="color: #ff4444; font-weight: bold;">※ AI 과도한 사용은 최하점수 처리됩니다.</span>
+                </div>
+            </div>
         </div>
 
-        <!-- 상단 고정 공지 배너 -->
-        <div id="next-topic-banner" style="background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2);">
-            📢 [다음 주제] 5월 1일: 국내 캠핑(차박) 2박 3일 소개하기
+        <!-- 상단 고정 배경 헤더 -->
+        <div class="header-bg">
+            <h1>🛡️ DRONE CONTENTS PRODUCTION</h1>
         </div>
 
         <!-- 1단계: 2중 보안 로그인 화면 -->
@@ -510,14 +546,19 @@
 
             <canvas id="gradeChart"></canvas>
             
-            <!-- 관리용 QR (공유용) -->
-            <div style="text-align: center; margin-top:20px;">
-                <div id="admin-qr" class="qr-section"></div>
-                <p style="font-size:10px; color:#666; margin-top:5px;">[사이트 접속 QR 코드]</p>
-            </div>
+            <div style="margin-top:25px; display:flex; flex-direction:column; gap:10px;">
+                <button class="btn" style="background:#4CAF50; color:white;" onclick="downloadCSV()">🟢 평가 데이터 CSV 다운로드</button>
+                
+                <!-- 관리용 QR (공유용) -->
+                <div style="text-align: center; margin: 15px 0; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 15px;">
+                    <div id="admin-qr" style="display:flex; justify-content:center;"></div>
+                    <p style="font-size:10px; color:#aaa; margin-top:5px;">[사이트 접속 QR 코드]</p>
+                </div>
 
-            <p style="text-align: center; font-size: 11px; color: #666; margin-top: 10px;">※ 모든 데이터는 브라우저에 실시간 자동 저장됩니다.</p>
-            <button class="btn btn-secondary" style="border:none; color:#666;" onclick="clearAllData()">초기화 (주의)</button>
+                <p style="text-align: center; font-size: 11px; color: #666;">※ 모든 데이터는 브라우저에 실시간 자동 저장됩니다.</p>
+                <button class="btn btn-secondary" onclick="clearAllData()" style="color:#ff4444; border-color:#ff4444; font-size:14px;">🔴 데이터 전체 삭제 (초기화)</button>
+                <button class="btn btn-secondary" onclick="backToEval()">닫기</button>
+            </div>
         </div>
 
         <!-- 최종 시스템 업그레이드 정보 (하단 우측) -->
@@ -542,7 +583,7 @@
         // 선생님의 따뜻한 한마디 DB
         const teacherComments = {
             "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
-            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 **[서론-본론-결론-하이라이트]**라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
+            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 **[서론-본론-결론-하이라이트]**라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만단다면 누구도 따라올 수 없는 영상이 될 거야!",
             "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
             "조우민": "성장의 즐거움을 증명한 우민아! 지난주보다 눈에 띄게 향상된 실력을 보며 선생님은 정말 뿌듯했단다. 지금처럼 '어제의 나보다 더 나은 오늘의 나'를 만드는 노력을 멈추지 마렴. 다음 영상에서는 또 어떤 발전을 보여줄지 벌써 기대가 되는구나!",
             "김종학": "창의적인 눈을 가진 종학아! 너의 감각은 충분히 훌륭해. 다만 그 감각이 결실을 맺으려면 조금 더 깊은 집중력과 시간 투자가 필요하단다. 이번에 부족했던 영상 시간과 내용을 네 독창적인 아이디어로 채워보렴. 네가 집중하는 순간, 영상의 퀄리티는 마법처럼 변할 거야!"
@@ -555,12 +596,6 @@
             "보성": "드론을 활용한 자연 풍경 촬영",
             "정욱": "드론을 이용한 스포츠 경기 중계",
             "우민": "드론을 활용한 교육 콘텐츠 제작"
-        };
-            "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
-            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 [서론-본론-결론-하이라이트]라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
-            "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
-            "조우민": "성장의 즐거움을 증명한 우민아! 지난주보다 눈에 띄게 향상된 실력을 보며 선생님은 정말 뿌듯했단다. 지금처럼 '어제의 나보다 더 나은 오늘의 나'를 만드는 노력을 멈추지 마렴. 다음 영상에서는 또 어떤 발전을 보여줄지 벌써 기대가 되는구나!",
-            "김종학": "창의적인 눈을 가진 종학아! 너의 감각은 충분히 훌륭해. 다만 그 감각이 결실을 맺으려면 조금 더 깊은 집중력과 시간 투자가 필요하단다. 이번에 부족했던 영상 시간과 내용을 네 독창적인 아이디어로 채워보렴. 네가 집중하는 순간, 영상의 퀄리티는 마법처럼 변할 거야!"
         };
 
         const gradeCriteria = {
@@ -616,7 +651,13 @@
             }
         }
 
-        // 실시간 한국 시간 업데이트 기능
+        // 수행평가 가이드 토글
+        function displayGuide() {
+            const modal = document.getElementById('guide-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        // 실시간 한국 시간 업데이트 기능 고도화
         function updateKST() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('ko-KR', { hour12: false });
@@ -651,10 +692,15 @@
             myImg.src = photoMap[userName] || "drone_hero.png";
             myImg.onerror = function() { this.src = 'drone_hero.png'; };
 
-            // 평가자 자동 선택 고정
+            // 평가자 자동 선택 정책 수정 (관리자일 경우 선택 활성화)
             const evalSelect = document.getElementById('evaluator-name');
-            evalSelect.value = userName === "관리자" ? "" : userName;
-            evalSelect.disabled = userName !== "관리자";
+            if (userName === "관리자") {
+                evalSelect.disabled = false;
+                evalSelect.value = ""; // 관리자는 직접 선택
+            } else {
+                evalSelect.value = userName;
+                evalSelect.disabled = true; // 학생은 자기 이름 고정
+            }
             filterTargetList();
         }
 
