@@ -15,6 +15,9 @@
             --border-color: #333333;
         }
 
+        /* 보안용 화면 숨김 클래스 - 필수 */
+        .hidden { display: none !important; }
+
         * {
             box-sizing: border-box;
             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
@@ -22,7 +25,9 @@
         }
 
         body {
-            background-color: var(--bg-color);
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('cherry_drone_header_bg.png');
+            background-attachment: fixed;
+            background-size: cover;
             color: var(--text-color);
             margin: 0;
             padding: 0;
@@ -218,10 +223,11 @@
                 position: fixed;
                 top: 50%;
                 transform: translateY(-50%);
-                width: 120px;
-                opacity: 0.6;
+                width: 150px; /* 크기를 조금 키움 */
+                opacity: 0.3; /* 배경과 조화롭게 투명도 조정 */
                 pointer-events: none;
-                z-index: 1;
+                z-index: 0;
+                filter: grayscale(30%);
             }
             .side-image-left { left: 10px; }
             .side-image-right { right: 10px; }
@@ -239,12 +245,15 @@
                 playPromise.then(() => {
                     status.innerText = "ON (Playing)";
                     status.style.color = "#00FF00";
-                }).catch(() => {
+                }).catch((e) => {
+                    console.log("Autoplay blocked. Waiting for user interaction...");
                     // 차단된 경우 첫 클릭 시 재생되도록 이벤트 등록
                     const startOnFirstClick = () => {
-                        audio.play();
-                        status.innerText = "ON (Playing)";
-                        status.style.color = "#00FF00";
+                        audio.play().then(() => {
+                            console.log("BGM started by user interaction.");
+                            status.innerText = "ON (Playing)";
+                            status.style.color = "#00FF00";
+                        }).catch(err => console.error("Interaction play failed:", err));
                         document.removeEventListener('click', startOnFirstClick);
                         document.removeEventListener('keydown', startOnFirstClick);
                     };
@@ -253,6 +262,17 @@
                 });
             }
         }
+        // 초기 상태: 로그인 화면만 표시하고 나머지는 철저히 숨김 (보안 핵심)
+        function initSystem() {
+            const loginScreen = document.getElementById('login-screen');
+            const evalScreen = document.getElementById('eval-screen');
+            const statsScreen = document.getElementById('stats-screen');
+            
+            if (loginScreen) loginScreen.classList.remove('hidden');
+            if (evalScreen) evalScreen.classList.add('hidden');
+            if (statsScreen) statsScreen.classList.add('hidden');
+        }
+
         window.addEventListener('load', () => {
             initSystem();
             tryAutoplay();
@@ -299,17 +319,17 @@
 
     <!-- 실시간 한국 시간 표시 -->
     <div id="current-time-view" class="time-display">KST: --:--:--</div>
-        <!-- 좌우 장식 이미지 -->
-        <img src="cherry_left.png" class="side-image side-image-left" alt="벚꽃">
-        <img src="drone_right.png" class="side-image side-image-right" alt="드론">
+        <!-- 좌우 장식 이미지 (현재 폴더에 있는 파일로 경로 수정) -->
+        <img src="cherry_drone_header_bg.png" class="side-image side-image-left" alt="벚꽃">
+        <img src="drone_hero.png" class="side-image side-image-right" alt="드론">
 
     <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
         <span>🎵 웅장한 비행 BGM</span>
         <span id="bgm-status">OFF</span>
     </div>
     <audio id="audio-bgm" loop autoplay>
-        <!-- 더 안정적이고 웅장한 무료 음원 링크 (자동 재생 지원용) -->
-        <source src="https://codeskulptor-demos.commondatastorage.googleapis.com/GalaxyInvaders/theme_01.mp3" type="audio/mpeg">
+        <!-- 웅장하고 안정적인 새로운 클래식 음원 링크 -->
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
     <div class="container">
@@ -554,6 +574,12 @@
 
         // 로그인 1단계 확인
         function nextLoginStep() {
+            // 버튼 누를 때 소리가 안 나고 있다면 강제로 재생 시도
+            const audio = document.getElementById('audio-bgm');
+            if (audio && audio.paused) {
+                audio.play().catch(e => console.log("BGM Play Error:", e));
+            }
+
             const id = document.getElementById('student-id').value;
             
             // 관리자 마스터 키 체크 (1983)
