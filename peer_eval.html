@@ -275,12 +275,13 @@
         }
     </style>
     <script>
-        // 처음 접속 시 평가 화면이 바로 나오도록 설정
-        function enforceEvalScreen() {
-            document.getElementById('eval-screen').classList.remove('hidden');
+        // 초기 상태: 로그인 화면만 표시
+        function initSystem() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('eval-screen').classList.add('hidden');
             document.getElementById('stats-screen').classList.add('hidden');
         }
-        window.addEventListener('load', enforceEvalScreen);
+        window.addEventListener('load', initSystem);
     </script>
     <style>
         @media (max-width: 480px) {
@@ -327,7 +328,35 @@
             📢 [다음 주제] 5월 1일: 국내 캠핑(차박) 2박 3일 소개하기
         </div>
 
-        <div id="eval-screen" class="card">
+        <!-- 1단계: 2중 보안 로그인 화면 -->
+        <div id="login-screen" class="card">
+            <img src="drone_hero.png" style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
+            <h1 style="font-size: 20px;">🛡️ 안티그래비티<br>2중 보안 로그인</h1>
+            
+            <div id="login-step-1">
+                <div class="input-group">
+                    <label for="student-id">1단계: 학번을 입력하세요</label>
+                    <input type="text" id="student-id" placeholder="예: 3606" maxlength="4">
+                </div>
+                <button class="btn" onclick="nextLoginStep()">다음 단계 (인증)</button>
+            </div>
+
+            <div id="login-step-2" class="hidden">
+                <div style="background:#000; padding:15px; border-radius:10px; border:1px solid #333; margin-bottom:20px;">
+                    <p style="font-size:14px; color:#FFFF00; margin-bottom:5px;">[Security Challenge]</p>
+                    <p id="binary-hint" style="font-size:13px; color:#fff;"></p>
+                </div>
+                <div class="input-group">
+                    <label for="binary-code">2단계: 8비트 2진수로 변환하세요</label>
+                    <input type="text" id="binary-code" placeholder="예: 00000110" maxlength="8" style="letter-spacing: 5px; text-align: center;">
+                </div>
+                <button class="btn" onclick="verifyLogin()">최종 보안 해제</button>
+            </div>
+            
+            <p style="text-align: center; font-size: 11px; color: #666; margin-top: 20px;">정보보안 및 드론 교과 융합 시스템</p>
+        </div>
+
+        <div id="eval-screen" class="card hidden">
             <img src="drone_hero.png"
                 style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
             <h2>🎥 동료평가 입력</h2>
@@ -425,8 +454,7 @@
 
         <!-- 3단계: 통계 및 관리 화면 -->
         <div id="stats-screen" class="card hidden">
-            <h2>📊 실시간 평가 통계</h2>
-            <div class="live-score">학급 평균: <span id="avg-score">0</span>점</div>
+            <h2>📊 상세 평가 결과 (최종)</h2>
 
             <canvas id="gradeChart"></canvas>
 
@@ -445,9 +473,17 @@
     </div>
 
     <script>
-        const ACCESS_PASSWORD = "1983!!"; // 변경된 암호
-        let evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
-        let chart = null;
+        const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
+        let currentUser = null;
+
+        // 학생 정보 DB (제공해주신 데이터 중심)
+        const studentDB = {
+            "3606": "문정욱",
+            "3507": "김종학",
+            "3517": "조우민",
+            "3603": "김예담",
+            "3501": "보성" // 예시 번호
+        };
 
         const gradeCriteria = {
             "12.5": "A: 흥미로운 플롯/콘티 시각화 명확, 자신감 있는 발표.",
@@ -457,6 +493,56 @@
             "5": "E: 주도적 참여 없음, 유의미한 결과물 없음.",
             "3": "I: 기본점수. 과제 제출했으나 결과물 없음."
         };
+
+        // 로그인 1단계 확인
+        function nextLoginStep() {
+            const id = document.getElementById('student-id').value;
+            
+            // 관리자 마스터 키 체크 (1983!!)
+            if (id === "1983!!") {
+                alert('관리자 모드로 접속합니다.');
+                currentUser = "관리자";
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('eval-screen').classList.remove('hidden');
+                
+                // 평가자 선택 리스트 활성화 (관리자는 자유롭게 선택 가능)
+                const evalSelect = document.getElementById('evaluator-name');
+                evalSelect.disabled = false;
+                return;
+            }
+
+            if (studentDB[id]) {
+                currentUser = studentDB[id];
+                const studentNum = parseInt(id.substring(2)); // 뒤의 두 자리 번호 추출
+                document.getElementById('binary-hint').innerText = `당신의 번호는 [${studentNum}번] 입니다.\n이 숫자를 8비트 2진수로 변환하여 입력하세요.`;
+                document.getElementById('login-step-1').classList.add('hidden');
+                document.getElementById('login-step-2').classList.remove('hidden');
+            } else {
+                alert('등록되지 않은 학번입니다.');
+            }
+        }
+
+        // 로그인 최종 확인 (2진수 검증)
+        function verifyLogin() {
+            const inputBinary = document.getElementById('binary-code').value.trim();
+            const id = document.getElementById('student-id').value;
+            const studentNum = parseInt(id.substring(2));
+            const correctBinary = studentNum.toString(2).padStart(8, '0');
+
+            if (inputBinary === correctBinary) {
+                alert(`${currentUser}님, 환영합니다. 보안이 해제되었습니다.`);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('eval-screen').classList.remove('hidden');
+                
+                // 평가자 자동 선택 및 고정
+                const evalSelect = document.getElementById('evaluator-name');
+                evalSelect.value = currentUser;
+                evalSelect.disabled = true; // 본인 이름 수정 불가
+                filterTargetList();
+            } else {
+                alert('2진수 변환값이 틀렸습니다. 다시 계산해 보세요.');
+            }
+        }
 
         // 본인 평가 방지: 평가자 선택 시 대상 리스트에서 본인 제외
         function filterTargetList() {
@@ -596,81 +682,69 @@
         function updateDashboard() {
             if (evaluations.length === 0) return;
 
-            const totalSum = evaluations.reduce((sum, e) => sum + e.total, 0);
-            const avg = totalSum / evaluations.length;
-            document.getElementById('avg-score').innerText = avg.toFixed(1);
-
-            const counts = { A: 0, B: 0, C: 0, D: 0, E: 0, I: 0 };
-            evaluations.forEach(e => counts[e.grade]++);
-
-            const ctx = document.getElementById('gradeChart').getContext('2d');
-            if (chart) chart.destroy();
-
-            chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['A', 'B', 'C', 'D', 'E', 'I'],
-                    datasets: [{
-                        label: '등급별 인원수',
-                        data: [counts.A, counts.B, counts.C, counts.D, counts.E, counts.I],
-                        backgroundColor: '#FFFF00',
-                        borderColor: '#FFFF00',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#333' }, ticks: { color: '#FFFF00' } },
-                        x: { ticks: { color: '#FFFF00' } }
-                    },
-                    plugins: { legend: { labels: { color: '#FFFF00' } } }
-                }
-            });
             // 개인별 상세 결과 렌더링
             renderIndividualResults();
         }
+        // 등급 계산 로직
+        function getGradeFromScore(score) {
+            if (score >= 12.0) return 'A';
+            if (score >= 10.5) return 'B';
+            if (score >= 8.5) return 'C';
+            if (score >= 6.5) return 'D';
+            if (score >= 4.5) return 'E';
+            return 'I';
+        }
+
         // 개인별 상세 결과를 카드로 렌더링
         function renderIndividualResults() {
             const summary = {};
             const photoMap = {
-                "종학": "student_jonghak.png",
-                "예담": "student_yedam.png",
-                "보성": "student_bosung.png",
-                "정욱": "student_jeonguk.png",
-                "우민": "student_woomin.png"
+                "종학": "종학.jpg.jpg", "예담": "예담.jpg.jpg",
+                "보성": "보성.jpg.jpg", "정욱": "정욱.jpg.jpg", "우민": "우민.jpg.jpg"
             };
 
-            // 데이터 집계
             evaluations.forEach(e => {
                 if (!summary[e.target]) {
-                    summary[e.target] = { total: 0, count: 0 };
+                    summary[e.target] = { total: 0, count: 0, feedbacks: [], topics: [] };
                 }
                 summary[e.target].total += e.total;
                 summary[e.target].count += 1;
+                if (e.feedback) summary[e.target].feedbacks.push(e.feedback);
+                if (e.topic) summary[e.target].topics.push(e.topic);
             });
 
             const container = document.getElementById('student-stats-list');
             container.innerHTML = '';
 
-            // 평가 데이터가 있는 학생들만 표시
             for (const [student, data] of Object.entries(summary)) {
                 const avg = data.total / data.count;
+                const finalGrade = getGradeFromScore(avg);
                 const photo = photoMap[student] || "drone_hero.png";
                 
+                // AI 종합 의견 생성 시뮬레이션
+                const aiAnalysis = `이 학생은 "${data.topics[0] || '주제 미정'}" 중심의 영상 기획에서 동료들에게 평균 ${avg.toFixed(1)}점의 신뢰를 얻었습니다. ${finalGrade}등급은 전반적으로 ${finalGrade === 'A' ? '혁신적인 아이디어' : '성실한 수행'}를 보여주었음을 의미합니다.`;
+
                 const card = document.createElement('div');
                 card.className = 'student-stat-card';
+                card.style.flexDirection = 'column';
+                card.style.alignItems = 'flex-start';
                 card.innerHTML = `
-                    <img src="${photo}" class="stat-photo" onerror="this.src='drone_hero.png'">
-                    <div class="stat-info">
-                        <div class="stat-name">${student}</div>
-                        <div class="stat-avg">평가 횟수: ${data.count}회</div>
+                    <div style="display:flex; width:100%; align-items:center; margin-bottom:10px;">
+                        <img src="${photo}" class="stat-photo" onerror="this.src='drone_hero.png'">
+                        <div class="stat-info">
+                            <div class="stat-name">${student}</div>
+                            <div class="stat-avg">평가참여: ${data.count}명</div>
+                        </div>
+                        <div class="stat-badge" style="font-size:24px;">${finalGrade}</div>
                     </div>
-                    <div class="stat-badge">${avg.toFixed(1)}점</div>
+                    <div style="background:#222; padding:10px; border-radius:10px; width:100%; font-size:12px; border-left:3px solid #FFFF00;">
+                        <strong style="color:#FFFF00;">🤖 AI 종합 평가:</strong><br>
+                        ${aiAnalysis}
+                    </div>
                 `;
                 container.appendChild(card);
             }
             
-            // 데이터가 하나도 없을 때 메시지
             if (Object.keys(summary).length === 0) {
                 container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">아직 제출된 평가가 없습니다.</p>';
             }
