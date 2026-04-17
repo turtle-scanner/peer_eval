@@ -27,9 +27,7 @@
         }
 
         body {
-            background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.95)), url('cherry_drone_header_bg.png');
-            background-attachment: fixed;
-            background-size: cover;
+            background: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 0;
@@ -219,17 +217,14 @@
 
         .header-bg {
             width: 100%;
-            height: 140px;
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('cherry_drone_header_bg.png');
-            background-size: cover;
-            background-position: center;
+            height: 100px;
+            background: #1a1a1a;
             border-radius: 20px 20px 0 0;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #FFC0CB;
-            box-shadow: 0 4px 15px rgba(255, 192, 203, 0.3);
+            border-bottom: 2px solid var(--accent-color);
         }
 
         .header-bg h1 {
@@ -379,9 +374,6 @@
 
     <!-- 실시간 한국 시간 표시 -->
     <div id="current-time-view" class="time-display">KST: --:--:--</div>
-    <!-- 좌우 장식 이미지 (현재 폴더에 있는 파일로 경로 수정) -->
-    <img src="cherry_drone_header_bg.png" class="side-image side-image-left" alt="벚꽃">
-    <img src="drone_hero.png" class="side-image side-image-right" alt="드론">
 
     <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
         <span>🎵 웅장한 비행 BGM</span>
@@ -481,10 +473,8 @@
             <!-- 본인 프로필 표시 섹션 -->
             <div id="evaluator-profile-section"
                 style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: rgba(255,255,0,0.1); border-radius: 15px; border: 1px solid #FFFF00;">
-                <img id="my-profile-img" src="drone_hero.png"
-                    style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #FFFF00; object-fit: cover;">
-                <div style="text-align: left;">
-                    <span id="my-name-display" style="font-weight: bold; color: #FFFF00;"></span> 님, 환영합니다!<br>
+                <div style="text-align: center;">
+                    <span id="my-name-display" style="font-weight: bold; color: #FFFF00; font-size: 18px;"></span> 님, 환영합니다!<br>
                     <span style="font-size: 11px; color: #ccc;">오늘도 동료의 성장을 응원해 주세요 🚀</span>
                 </div>
             </div>
@@ -519,7 +509,6 @@
                     <option value="우민">우민</option>
                 </select>
                 <div id="student-photo-container" class="hidden">
-                    <img id="target-photo-img" src="">
                     <p id="target-name-display"
                         style="color: #FFFF00; font-weight: bold; margin-top: 10px; font-size: 18px;"></p>
                 </div>
@@ -1121,7 +1110,6 @@
 
                 card.innerHTML = `
                     <div style="display:flex; width:100%; align-items:center; margin-bottom:15px;">
-                        <img src="${photo}" class="stat-photo" onerror="this.src='drone_hero.png'">
                         <div class="stat-info">
                             <div class="stat-name">${student}</div>
                             <div class="stat-avg">참여: ${data.count}명 (${avg.toFixed(1)}점)</div>
