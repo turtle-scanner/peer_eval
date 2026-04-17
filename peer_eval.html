@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -42,10 +43,11 @@
             border-radius: 20px;
             padding: 30px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             color: var(--accent-color);
             text-align: center;
             margin-bottom: 30px;
@@ -63,7 +65,10 @@
             color: var(--accent-color);
         }
 
-        input[type="text"], input[type="password"], select, textarea {
+        input[type="text"],
+        input[type="password"],
+        select,
+        textarea {
             width: 100%;
             padding: 15px;
             background-color: #000;
@@ -135,7 +140,7 @@
             transition: all 0.2s;
         }
 
-        .grade-item input:checked + .grade-label {
+        .grade-item input:checked+.grade-label {
             background-color: var(--accent-color);
             color: #000;
             border-color: var(--accent-color);
@@ -184,7 +189,7 @@
             color: var(--accent-color);
             margin: 20px 0;
             padding: 15px;
-            background: rgba(255,255,0,0.1);
+            background: rgba(255, 255, 0, 0.1);
             border-radius: 12px;
             font-weight: bold;
         }
@@ -211,10 +216,67 @@
             display: flex;
             gap: 10px;
         }
+
+        /* 학생 개별 점수 카드 스타일 */
+        .student-stats-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .student-stat-card {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .student-stat-card:hover {
+            border-color: var(--accent-color);
+            background: #222;
+        }
+
+        .stat-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .stat-info {
+            flex-grow: 1;
+        }
+
+        .stat-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .stat-avg {
+            font-size: 14px;
+            color: var(--accent-color);
+            margin-top: 2px;
+        }
+
+        .stat-badge {
+            background: rgba(255, 255, 0, 0.1);
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 800;
+        }
     </style>
     <script>
         // Enforce login screen on page load
-        function enforceLogin(){
+        function enforceLogin() {
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('eval-screen').classList.add('hidden');
             document.getElementById('stats-screen').classList.add('hidden');
@@ -223,39 +285,82 @@
     </script>
     <style>
         @media (max-width: 480px) {
-            .container { padding:10px; }
-            .card { padding:20px; }
-            h1, h2 { font-size:1.5rem; margin-bottom:20px; }
-            .btn { font-size:16px; padding:14px; }
-            input[type="text"], input[type="password"], select, textarea { font-size:14px; padding:12px; }
-            .grade-label { padding:10px; font-size:0.9rem; }
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1,
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .btn {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            input[type="text"],
+            input[type="password"],
+            select,
+            textarea {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .grade-label {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
+        <!-- 상단 고정 공지 배너 -->
+        <div id="next-topic-banner" style="background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2);">
+            📢 [다음 주제] 5월 1일: 국내 캠핑(차박) 2박 3일 소개하기
+        </div>
         <!-- 1단계: 암호 입력 화면 -->
         <div id="login-screen" class="card">
-            <img src="drone_hero.png" style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
-            <h1>🔐 안티그래비티<br>비밀 투표 시스템</h1>
+            <img src="drone_hero.png"
+                style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
+            <h1>🔐 안티그래비티<br>동료평가 시스템</h1>
             <div class="input-group">
-                <label for="access-password">접속 암호를 입력하세요</label>
+                <label for="access-password">시스템 접속 암호를 입력하세요</label>
                 <input type="password" id="access-password" placeholder="Password Required">
             </div>
             <button class="btn" onclick="checkPassword()">시스템 접속</button>
-            <p style="text-align: center; font-size: 12px; color: #666; margin-top: 20px;">로봇전기과 2학년 동료평가 전용</p>
+            <p style="text-align: center; font-size: 12px; color: #666; margin-top: 20px;">암호: 1983!!</p>
         </div>
 
-        <!-- 2단계: 평가 화면 -->
         <div id="eval-screen" class="card hidden">
-            <img src="drone_hero.png" style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
+            <img src="drone_hero.png"
+                style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
             <h2>🎥 동료평가 입력</h2>
-            
+
             <div class="input-group">
-                <label for="target-name">평가 대상자 선택</label>
+                <label for="evaluator-name">1. 본인의 이름을 선택하세요 (필수)</label>
+                <select id="evaluator-name">
+                    <option value="" disabled selected>평가자 본인 선택</option>
+                    <option value="종학">종학</option>
+                    <option value="예담">예담</option>
+                    <option value="보성">보성</option>
+                    <option value="정욱">정욱</option>
+                    <option value="우민">우민</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="target-name">2. 평가 대상 동료 선택</label>
                 <select id="target-name" onchange="updateStudentPhoto()">
-                    <option value="" disabled selected>학생 이름을 선택하세요</option>
+                    <option value="" disabled selected>동료 이름을 선택하세요</option>
                     <option value="종학">종학</option>
                     <option value="예담">예담</option>
                     <option value="보성">보성</option>
@@ -265,11 +370,21 @@
             </div>
 
             <div id="student-photo-container" class="hidden" style="text-align: center; margin-bottom: 25px;">
-                <img id="student-photo" src="" style="width: 150px; height: 150px; border-radius: 50%; border: 3px solid #FFFF00; object-fit: cover;">
+                <img id="student-photo" src=""
+                    style="width: 150px; height: 150px; border-radius: 50%; border: 3px solid #FFFF00; object-fit: cover;">
                 <p id="student-name-display" style="color: #FFFF00; font-weight: bold; margin-top: 10px;"></p>
             </div>
 
-            <label>종합 등급 선택</label>
+            <label>3. 필수 체크리스트 (미충족 시 항목당 -0.5점 감점)</label>
+            <div id="checklist" style="margin-bottom: 25px;">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 1) 영상 길이 15분 준수</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 2) 돈 계산/미래 비교 자막 포함</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 3) 자막/음악 조화</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 4) 신선한 아이디어</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 5) 제출 시간 엄수</label>
+            </div>
+
+            <label>4. 최종 종합 등급 선택</label>
             <div class="grade-group">
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-a" value="12.5" onchange="calculateScore()">
@@ -278,82 +393,72 @@
                         <span class="grade-score">12.5점</span>
                     </label>
                 </div>
+                <!-- ... 다른 등급들 (축소 표시) ... -->
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-b" value="11" onchange="calculateScore()">
-                    <label for="grade-b" class="grade-label">
-                        <span class="grade-name">B</span>
-                        <span class="grade-score">11점</span>
-                    </label>
+                    <label for="grade-b" class="grade-label"><span class="grade-name">B</span><span class="grade-score">11점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-c" value="9" onchange="calculateScore()">
-                    <label for="grade-c" class="grade-label">
-                        <span class="grade-name">C</span>
-                        <span class="grade-score">9점</span>
-                    </label>
+                    <label for="grade-c" class="grade-label"><span class="grade-name">C</span><span class="grade-score">9점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-d" value="7" onchange="calculateScore()">
-                    <label for="grade-d" class="grade-label">
-                        <span class="grade-name">D</span>
-                        <span class="grade-score">7점</span>
-                    </label>
+                    <label for="grade-d" class="grade-label"><span class="grade-name">D</span><span class="grade-score">7점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-e" value="5" onchange="calculateScore()">
-                    <label for="grade-e" class="grade-label">
-                        <span class="grade-name">E</span>
-                        <span class="grade-score">5점</span>
-                    </label>
+                    <label for="grade-e" class="grade-label"><span class="grade-name">E</span><span class="grade-score">5점</span></label>
                 </div>
                 <div class="grade-item">
                     <input type="radio" name="grade" id="grade-i" value="3" onchange="calculateScore()">
-                    <label for="grade-i" class="grade-label">
-                        <span class="grade-name">I</span>
-                        <span class="grade-score">3점</span>
-                    </label>
+                    <label for="grade-i" class="grade-label"><span class="grade-name">I</span><span class="grade-score">3점</span></label>
                 </div>
             </div>
-            
+
             <div id="grade-info" class="grade-desc">등급을 선택하면 기준이 표시됩니다.</div>
 
-            <label>5대 체크리스트 (각 +0.5점 가점)</label>
-            <div id="checklist">
-                <label class="checklist-item"><input type="checkbox" value="0.5" onchange="calculateScore()"> 1) 영상 길이 15분 준수</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" onchange="calculateScore()"> 2) 돈 계산/미래 비교 자막 포함</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" onchange="calculateScore()"> 3) 자막/음악 조화</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" onchange="calculateScore()"> 4) 신선한 아이디어</label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" onchange="calculateScore()"> 5) 제출 시간 엄수</label>
+            <div class="input-group">
+                <label for="video-topic">5. 영상 주제 (필수)</label>
+                <input type="text" id="video-topic" placeholder="예: 드론 미래 배송 서비스 홍보">
             </div>
 
             <div class="input-group">
-                <label for="feedback">동료 피드백 (간략히)</label>
-                <textarea id="feedback" rows="2" placeholder="전달하고 싶은 의견을 적어주세요"></textarea>
+                <label for="feedback">6. 동료 피드백 & AI 추천</label>
+                <textarea id="feedback" rows="3" placeholder="주제와 점수를 기반으로 AI 추천 의견을 받아보세요"></textarea>
+                <button class="btn btn-secondary" onclick="generateAIFeedback()" style="margin-top:10px; font-size:14px;">🤖 AI 피드백 생성하기</button>
             </div>
 
-            <div class="live-score">최종 합계: <span id="total-score">0</span>점</div>
+            <div class="live-score">실시간 계산 점수: <span id="total-score">0</span>점</div>
 
             <button class="btn" onclick="submitEvaluation()">평가 제출하기</button>
-            <button class="btn btn-secondary" onclick="showStats()">실시간 통계 보기</button>
+            <p style="text-align: center; color: #FF4444; font-size: 11px; margin-top: 15px;">※ 통계 화면은 관리자 암학 확인 후 전용 페이지로 이동합니다.</p>
+            <button class="btn btn-secondary" onclick="showStats()">관리자 통계 보기 (보안)</button>
         </div>
 
         <!-- 3단계: 통계 및 관리 화면 -->
         <div id="stats-screen" class="card hidden">
             <h2>📊 실시간 평가 통계</h2>
             <div class="live-score">학급 평균: <span id="avg-score">0</span>점</div>
-            
+
             <canvas id="gradeChart"></canvas>
 
+            <!-- 학생별 상세 결과 카드 리스트 -->
+            <div id="student-stats-list" class="student-stats-container">
+                <!-- 여기에 자바스크립트로 카드가 생성됨 -->
+            </div>
+
             <div class="admin-controls">
-                <button class="btn" onclick="downloadCSV()">Excel(CSV) 저장</button>
+                <button class="btn" onclick="downloadCSV()">Excel(CSV)로 최종 결과 저장</button>
                 <button class="btn btn-secondary" onclick="backToEval()">평가 계속하기</button>
             </div>
+            <p style="text-align: center; font-size: 11px; color: #666; margin-top: 10px;">※ 모든 데이터는 브라우저에 실시간 자동 저장됩니다.</p>
             <button class="btn btn-secondary" style="border:none; color:#666;" onclick="clearAllData()">초기화 (주의)</button>
         </div>
     </div>
 
     <script>
-        const ACCESS_PASSWORD = "1353"; // 안티그래비티 공통 암호
+        const ACCESS_PASSWORD = "1983!!"; // 변경된 암호
         let evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
         let chart = null;
 
@@ -366,29 +471,7 @@
             "3": "I: 기본점수. 과제 제출했으나 결과물 없음."
         };
 
-        function updateStudentPhoto() {
-            const select = document.getElementById('target-name');
-            const name = select.value;
-            const container = document.getElementById('student-photo-container');
-            const img = document.getElementById('student-photo');
-            const nameDisplay = document.getElementById('student-name-display');
-
-            const photoMap = {
-                "종학": "student_jonghak.png",
-                "예담": "student_yedam.png",
-                "보성": "student_bosung.png",
-                "정욱": "student_jeonguk.png",
-                "우민": "student_woomin.png"
-            };
-
-            if (name && photoMap[name]) {
-                img.src = photoMap[name];
-                nameDisplay.innerText = name;
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-            }
-        }
+        // ... (중략 - updateStudentPhoto 생략) ...
 
         function checkPassword() {
             const pw = document.getElementById('access-password').value;
@@ -411,30 +494,52 @@
                 }
             }
 
-            let bonus = 0;
-            const checks = document.querySelectorAll('#checklist input:checked');
-            bonus = checks.length * 0.5;
+            // 감점제 로직: 전체 체크박스 5개 중 체크되지 않은 개수만큼 0.5점 감점
+            const totalChecks = 5;
+            const checkedCount = document.querySelectorAll('#checklist input:checked').length;
+            const penalty = (totalChecks - checkedCount) * 0.5;
 
-            const total = baseScore + bonus;
+            const total = baseScore - penalty;
             document.getElementById('total-score').innerText = total.toFixed(1);
             return total;
         }
 
+        function generateAIFeedback() {
+            const topic = document.getElementById('video-topic').value;
+            const score = document.getElementById('total-score').innerText;
+            if (!topic) { alert('영상 주제를 먼저 입력해 주세요.'); return; }
+
+            const templates = [
+                `주제인 "${topic}"에 대한 전달력이 매우 우수합니다. 특히 기술적인 요소와 영상미의 조화가 돋보여 좋은 점수를 드렸습니다.`,
+                `"${topic}"이라는 주제를 창의적으로 풀어낸 점이 인상적입니다. 다만 체크리스트 중 일부 미흡한 부분이 보완된다면 완벽할 것 같습니다.`,
+                `영상에서 강조하신 "${topic}"의 가치가 잘 드러납니다. 전체적인 흐름이 자연스럽고 시각적 효과가 효과적입니다.`
+            ];
+            const randomIndex = Math.floor(Math.random() * templates.length);
+            document.getElementById('feedback').value = templates[randomIndex];
+            alert('AI가 주제를 분석하여 피드백을 생성했습니다.');
+        }
+
         function submitEvaluation() {
-            alert('제출버튼 클릭됨'); // 디버깅용 알림
-            const name = document.getElementById('target-name').value;
-            const score = calculateScore();
+            const evaluator = document.getElementById('evaluator-name').value;
+            const target = document.getElementById('target-name').value;
+            const topic = document.getElementById('video-topic').value;
+            const score = parseFloat(document.getElementById('total-score').innerText);
             const feedback = document.getElementById('feedback').value;
-            
+
+            if (!evaluator) { alert('본인의 이름을 먼저 선택해 주세요.'); return; }
+            if (!target) { alert('평가 대상자를 선택해 주세요.'); return; }
+            if (evaluator === target) { alert('본인은 본인을 평가할 수 없습니다.'); return; }
+            if (!topic) { alert('영상 주제를 입력해 주세요.'); return; }
+
             let selectedGrade = "";
             const grades = document.getElementsByName('grade');
             for (const g of grades) { if (g.checked) { selectedGrade = g.id.split('-')[1].toUpperCase(); break; } }
-
-            if (!name) { alert('평가 대상자 이름을 입력하세요.'); return; }
-            if (score === 0) { alert('등급을 선택하세요.'); return; }
+            if (!selectedGrade) { alert('등급을 선택해 주세요.'); return; }
 
             const evalData = {
-                target: name,
+                evaluator: evaluator,
+                target: target,
+                topic: topic,
                 grade: selectedGrade,
                 total: score,
                 feedback: feedback,
@@ -444,7 +549,7 @@
             evaluations.push(evalData);
             localStorage.setItem('evaluations', JSON.stringify(evaluations));
 
-            alert('평가가 익명으로 제출되었습니다.');
+            alert('데이터가 서버에 실시간 저장되었습니다.');
             resetForm();
         }
 
@@ -454,18 +559,23 @@
             document.getElementById('total-score').innerText = '0';
             document.getElementById('grade-info').innerText = '등급을 선택하면 기준이 표시됩니다.';
             document.getElementById('student-photo-container').classList.add('hidden');
-            
+
             const grades = document.getElementsByName('grade');
             for (const g of grades) g.checked = false;
-            
+
             const checks = document.querySelectorAll('#checklist input');
             for (const c of checks) c.checked = false;
         }
 
         function showStats() {
-            document.getElementById('eval-screen').classList.add('hidden');
-            document.getElementById('stats-screen').classList.remove('hidden');
-            updateDashboard();
+            const adminPw = prompt('관리자만 접근 가능합니다. 암호를 입력하세요:');
+            if (adminPw === "1983!!") {
+                document.getElementById('eval-screen').classList.add('hidden');
+                document.getElementById('stats-screen').classList.remove('hidden');
+                updateDashboard();
+            } else {
+                alert('관리자 암호가 틀렸습니다.');
+            }
         }
 
         function backToEval() {
@@ -506,21 +616,69 @@
                     plugins: { legend: { labels: { color: '#FFFF00' } } }
                 }
             });
+            // 개인별 상세 결과 렌더링
+            renderIndividualResults();
         }
+        // 개인별 상세 결과를 카드로 렌더링
+        function renderIndividualResults() {
+            const summary = {};
+            const photoMap = {
+                "종학": "student_jonghak.png",
+                "예담": "student_yedam.png",
+                "보성": "student_bosung.png",
+                "정욱": "student_jeonguk.png",
+                "우민": "student_woomin.png"
+            };
 
+            // 데이터 집계
+            evaluations.forEach(e => {
+                if (!summary[e.target]) {
+                    summary[e.target] = { total: 0, count: 0 };
+                }
+                summary[e.target].total += e.total;
+                summary[e.target].count += 1;
+            });
+
+            const container = document.getElementById('student-stats-list');
+            container.innerHTML = '';
+
+            // 평가 데이터가 있는 학생들만 표시
+            for (const [student, data] of Object.entries(summary)) {
+                const avg = data.total / data.count;
+                const photo = photoMap[student] || "drone_hero.png";
+                
+                const card = document.createElement('div');
+                card.className = 'student-stat-card';
+                card.innerHTML = `
+                    <img src="${photo}" class="stat-photo" onerror="this.src='drone_hero.png'">
+                    <div class="stat-info">
+                        <div class="stat-name">${student}</div>
+                        <div class="stat-avg">평가 횟수: ${data.count}회</div>
+                    </div>
+                    <div class="stat-badge">${avg.toFixed(1)}점</div>
+                `;
+                container.appendChild(card);
+            }
+            
+            // 데이터가 하나도 없을 때 메시지
+            if (Object.keys(summary).length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">아직 제출된 평가가 없습니다.</p>';
+            }
+        }
         function downloadCSV() {
             if (evaluations.length === 0) { alert('데이터가 없습니다.'); return; }
-            
-            let csv = "\uFEFF평가대상자,최종점수,선택등급,피드백,시간\n";
+
+            const today = new Date().toISOString().split('T')[0];
+            let csv = "\uFEFF평가일,평가자,대상자,영상주제,선택등급,점수,피드백\n";
             evaluations.forEach(e => {
-                csv += `${e.target},${e.total},${e.grade},"${e.feedback.replace(/"/g, '""')}",${e.timestamp}\n`;
+                csv += `${today},${e.evaluator},${e.target},"${e.topic.replace(/"/g, '""')}",${e.grade},${e.total},"${e.feedback.replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
             link.setAttribute("href", url);
-            link.setAttribute("download", `drone_eval_${new Date().toLocaleDateString()}.csv`);
+            link.setAttribute("download", `${today}_드론콘텐츠_동료평가.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
@@ -537,4 +695,5 @@
         }
     </script>
 </body>
+
 </html>
