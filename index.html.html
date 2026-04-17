@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 드론콘텐츠제작 동료평가 비밀 투표 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #111111;
+            --accent-color: #FFFF00;
+            --text-color: #FFFFFF;
+            --border-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1,
+        h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            margin-top: 10px;
+        }
+
+        /* 등급 라디오 버튼 커스텀 */
+        .grade-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grade-item {
+            position: relative;
+        }
+
+        .grade-item input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .grade-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            background-color: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .grade-item input:checked+.grade-label {
+            background-color: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
+        }
+
+        .grade-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .grade-score {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .grade-desc {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 10px;
+            text-align: center;
+            min-height: 40px;
+        }
+
+        /* 체크리스트 */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: #1a1a1a;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .checklist-item input {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            accent-color: var(--accent-color);
+        }
+
+        /* 점수 표시 */
+        .live-score {
+            text-align: center;
+            font-size: 24px;
+            color: var(--accent-color);
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 0, 0.1);
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .header-bg {
+            width: 100%; height: 140px;
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('cherry_drone_header_bg.png');
+            background-size: cover; background-position: center; border-radius: 20px 20px 0 0;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+            border-bottom: 2px solid #FFC0CB; box-shadow: 0 4px 15px rgba(255,192,203,0.3);
+        }
+        .header-bg h1 {
+            font-size: 20px; margin: 0; color: #fff; letter-spacing: 3px; font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7), 0 0 10px rgba(255,192,203,0.5);
+        }
+        #student-photo-container { text-align: center; margin: 25px 0; animation: fadeIn 0.5s ease; }
+        #target-photo-img {
+            width: 130px; height: 130px; border-radius: 50%; border: 4px solid #FFFF00;
+            object-fit: cover; box-shadow: 0 0 20px rgba(255,255,0,0.4);
+            transition: all 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+    <script>
+        // 초기 상태: 로그인 화면만 표시
+        function initSystem() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('eval-screen').classList.add('hidden');
+            document.getElementById('stats-screen').classList.add('hidden');
+        }
+        window.addEventListener('load', initSystem);
+    </script>
+    <style>
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1,
+            h2 {
+                font-size: 1.5rem;
+                margin-bottom: 20px;
+            }
+
+            .btn {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            input[type="text"],
+            input[type="password"],
+            select,
+            textarea {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .grade-label {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 실시간 한국 시간 표시 -->
+    <div id="current-time-view" class="time-display">KST: --:--:--</div>
+
+    <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
+        <span>🎵 웅장한 비행 BGM</span>
+        <span id="bgm-status">OFF</span>
+    </div>
+    <audio id="audio-bgm" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <!-- 상단 고정 배경 헤더 -->
+        <div class="header-bg">
+            <h1>🛡️ ANTI GRAVITY DRONE SYSTEM</h1>
+        </div>
+
+        <!-- 상단 고정 공지 배너 -->
+        <div id="next-topic-banner" style="background: linear-gradient(90deg, #FFFF00, #FFA500); color: #000; padding: 12px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(255, 255, 0, 0.2);">
+            📢 [다음 주제] 5월 1일: 국내 캠핑(차박) 2박 3일 소개하기
+        </div>
+
+        <!-- 1단계: 2중 보안 로그인 화면 -->
+        <div id="login-screen" class="card">
+            <img src="drone_hero.png" style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
+            <h1 style="font-size: 20px;">🛡️ 안티그래비티<br>2중 보안 로그인</h1>
+            
+            <!-- 로그인 시 QR 접속 안내 -->
+            <div style="text-align:center; margin-bottom: 20px;">
+                <p style="font-size:11px; color:#aaa; margin-bottom:5px;">📱 스마트폰 카메라로 QR을 찍어보세요!</p>
+                <div id="login-qr" class="qr-section"></div>
+            </div>
+            
+            <div id="login-step-1">
+                <div class="input-group">
+                    <label for="student-id">1단계: 학번을 입력하세요</label>
+                    <input type="text" id="student-id" placeholder="예: 3606" maxlength="4">
+                </div>
+                <button class="btn" onclick="nextLoginStep()">다음 단계 (인증)</button>
+            </div>
+
+            <div id="login-step-2" class="hidden">
+                <div style="background:#000; padding:15px; border-radius:10px; border:1px solid #333; margin-bottom:20px;">
+                    <p style="font-size:14px; color:#FFFF00; margin-bottom:5px;">[Security Challenge]</p>
+                    <p id="binary-hint" style="font-size:13px; color:#fff;"></p>
+                </div>
+                <div class="input-group">
+                    <label for="binary-code">2단계: 8비트 2진수로 변환하세요</label>
+                    <input type="text" id="binary-code" placeholder="예: 00000110" maxlength="8" style="letter-spacing: 5px; text-align: center;">
+                </div>
+                <button class="btn" onclick="verifyLogin()">최종 보안 해제</button>
+            </div>
+            
+            <p style="text-align: center; font-size: 11px; color: #666; margin-top: 20px;">정보보안 및 드론 교과 융합 시스템</p>
+        </div>
+
+        <div id="eval-screen" class="card hidden">
+            <!-- 본인 프로필 표시 섹션 -->
+            <div id="evaluator-profile-section" style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; padding: 10px; background: rgba(255,255,0,0.1); border-radius: 15px; border: 1px solid #FFFF00;">
+                <img id="my-profile-img" src="drone_hero.png" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #FFFF00; object-fit: cover;">
+                <div style="text-align: left;">
+                    <span id="my-name-display" style="font-weight: bold; color: #FFFF00;"></span> 님, 환영합니다!<br>
+                    <span style="font-size: 11px; color: #ccc;">오늘도 동료의 성장을 응원해 주세요 🚀</span>
+                </div>
+            </div>
+
+            <!-- 선생님의 응원 문구 -->
+            <div style="text-align: center; color: #FFFF00; font-style: italic; font-size: 14px; margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #333; line-height: 1.6;">
+                "지금의 부족함은 너희가 더 높이 점프하기 위해<br>잠시 굽히고 있는 무릎과 같다"
+            </div>
+            <img src="drone_hero.png"
+                style="width: 100%; border-radius: 15px; margin-bottom: 20px; border: 1px solid #333;">
+            <h2>🎥 동료평가 입력</h2>
+
+            <div class="input-group">
+                <label for="evaluator-name">1. 본인의 이름을 선택하세요 (필수)</label>
+                <select id="evaluator-name" onchange="filterTargetList()">
+                    <option value="" disabled selected>평가자 본인 선택</option>
+                    <option value="종학">종학</option>
+                    <option value="예담">예담</option>
+                    <option value="보성">보성</option>
+                    <option value="정욱">정욱</option>
+                    <option value="우민">우민</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="target-name">2. 평가 대상 동료 선택</label>
+                <select id="target-name" onchange="updateStudentPhoto()">
+                    <option value="" disabled selected>동료 이름을 선택하세요</option>
+                    <option value="종학">종학</option>
+                    <option value="예담">예담</option>
+                    <option value="보성">보성</option>
+                    <option value="정욱">정욱</option>
+                    <option value="우민">우민</option>
+                </select>
+                <div id="student-photo-container" class="hidden">
+                    <img id="target-photo-img" src="">
+                    <p id="target-name-display" style="color: #FFFF00; font-weight: bold; margin-top: 10px; font-size: 18px;"></p>
+                </div>
+            </div>
+
+            <label>3. 필수 체크리스트 (항목 누락 시 등급 자동 하락)</label>
+            <div id="checklist" style="margin-bottom: 25px;">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 1) 영상 길이 15분 준수</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 2) 돈 계산/미래 비교 자막 포함</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 3) 자막/음악 조화</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 4) 신선한 아이디어</label>
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()"> 5) 제출 시간 엄수</label>
+            </div>
+
+            <label>4. 최종 종합 등급 (체크리스트에 따라 자동 결정)</label>
+            <div class="grade-group">
+                <div class="grade-item">
+                    <input type="radio" name="grade" id="grade-a" value="12.5" onchange="calculateScore()">
+                    <label for="grade-a" class="grade-label">
+                        <span class="grade-name">A</span>
+                        <span class="grade-score">12.5점</span>
+                    </label>
+                </div>
+                <!-- ... 다른 등급들 (축소 표시) ... -->
+                <div class="grade-item">
+                    <input type="radio" name="grade" id="grade-b" value="11" onchange="calculateScore()">
+                    <label for="grade-b" class="grade-label"><span class="grade-name">B</span><span class="grade-score">11점</span></label>
+                </div>
+                <div class="grade-item">
+                    <input type="radio" name="grade" id="grade-c" value="9" onchange="calculateScore()">
+                    <label for="grade-c" class="grade-label"><span class="grade-name">C</span><span class="grade-score">9점</span></label>
+                </div>
+                <div class="grade-item">
+                    <input type="radio" name="grade" id="grade-d" value="7" onchange="calculateScore()">
+                    <label for="grade-d" class="grade-label"><span class="grade-name">D</span><span class="grade-score">7점</span></label>
+                </div>
+                <div class="grade-item">
+                    <input type="radio" name="grade" id="grade-e" value="5" onchange="calculateScore()">
+                    <label for="grade-e" class="grade-label"><span class="grade-name">E</span><span class="grade-score">5점</span></label>
+                </div>
+                <div class="grade-item">
+                    <input type="radio" name="grade" id="grade-i" value="3" onchange="calculateScore()">
+                    <label for="grade-i" class="grade-label"><span class="grade-name">I</span><span class="grade-score">3점</span></label>
+                </div>
+            </div>
+
+            <div id="grade-info" class="grade-desc">등급을 선택하면 기준이 표시됩니다.</div>
+
+            <div class="input-group">
+                <label for="video-topic">5. 영상 주제 (필수)</label>
+                <input type="text" id="video-topic" placeholder="예: 드론 미래 배송 서비스 홍보">
+            </div>
+
+            <div class="input-group">
+                <label for="feedback">7. 동료 피드백 & AI 추천</label>
+                <textarea id="feedback" rows="3" placeholder="주제와 점수를 기반으로 AI 추천 의견을 받아보세요"></textarea>
+                <button class="btn btn-secondary" onclick="generateAIFeedback()" style="margin-top:10px; font-size:14px;">🤖 AI 피드백 생성하기</button>
+            </div>
+
+            <div class="input-group" style="background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; border: 1px dashed #555;">
+                <label>⭐ 내가 생각하는 동료의 주관적 등급</label>
+                <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="A"> A</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="B"> B</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="C"> C</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="D"> D</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="E"> E</label>
+                </div>
+            </div>
+
+            <div class="live-score">실시간 계산 점수: <span id="total-score">0.0</span>점</div>
+
+            <button class="btn" onclick="submitEvaluation()">평가 제출하기</button>
+            <p style="text-align: center; color: #666; font-size: 11px; margin-top: 15px;">※ 통계 결과는 관리자만 확인 가능합니다.</p>
+            <button class="btn btn-secondary" onclick="showStats()">관리자 통계 보기</button>
+        </div>
+
+        <!-- 3단계: 통계 및 관리 화면 -->
+        <div id="stats-screen" class="card hidden">
+            <h2>📊 상세 평가 결과 (최종)</h2>
+
+            <!-- 실시간 제출 현황 게이지 -->
+            <div style="background: rgba(255,255,0,0.05); padding: 15px; border-radius: 15px; border: 1px dashed #FFFF00; margin-bottom: 20px;">
+                <label style="margin-bottom:5px;">🔥 학급 제출 현황 (<span id="submit-count">0</span> / 5명 완료)</label>
+                <div class="progress-container">
+                    <div id="submit-progress" class="progress-bar"></div>
+                    <div id="progress-percent" class="progress-text">0%</div>
+                </div>
+            </div>
+
+            <canvas id="gradeChart"></canvas>
+            
+            <!-- 관리용 QR (공유용) -->
+            <div style="text-align: center; margin-top:20px;">
+                <div id="admin-qr" class="qr-section"></div>
+                <p style="font-size:10px; color:#666; margin-top:5px;">[사이트 접속 QR 코드]</p>
+            </div>
+
+            <p style="text-align: center; font-size: 11px; color: #666; margin-top: 10px;">※ 모든 데이터는 브라우저에 실시간 자동 저장됩니다.</p>
+            <button class="btn btn-secondary" style="border:none; color:#666;" onclick="clearAllData()">초기화 (주의)</button>
+        </div>
+
+        <!-- 최종 시스템 업그레이드 정보 (하단 우측) -->
+        <div style="text-align: right; margin-top: 30px; font-size: 10px; color: #444; letter-spacing: 1px;">
+            🛡️ ANTI GRAVITY v3.0 | <strong>System Upgraded: 2026. 04. 17</strong>
+        </div>
+    </div>
+
+    <script>
+        const evaluations = JSON.parse(localStorage.getItem('evaluations') || '[]');
+        let currentUser = null;
+
+        // 학생 정보 DB (제공해주신 데이터 최신화)
+        const studentDB = {
+            "3606": "문정욱",
+            "3507": "김종학",
+            "3517": "조우민",
+            "3603": "김예담",
+            "3503": "보성"
+        };
+
+        // 선생님의 따뜻한 한마디 DB
+        const teacherComments = {
+            "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
+            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 **[서론-본론-결론-하이라이트]**라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
+            "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
+            "조우민": "성장의 즐거움을 증명한 우민아! 지난주보다 눈에 띄게 향상된 실력을 보며 선생님은 정말 뿌듯했단다. 지금처럼 '어제의 나보다 더 나은 오늘의 나'를 만드는 노력을 멈추지 마렴. 다음 영상에서는 또 어떤 발전을 보여줄지 벌써 기대가 되는구나!",
+            "김종학": "창의적인 눈을 가진 종학아! 너의 감각은 충분히 훌륭해. 다만 그 감각이 결실을 맺으려면 조금 더 깊은 집중력과 시간 투자가 필요하단다. 이번에 부족했던 영상 시간과 내용을 네 독창적인 아이디어로 채워보렴. 네가 집중하는 순간, 영상의 퀄리티는 마법처럼 변할 거야!"
+        };
+
+        // 각 학생별 정답 영상 주제 (예시) – 5번 입력 필수
+        const expectedTopics = {
+            "종학": "국내 캠핑(차박) 2박 3일 소개하기",
+            "예담": "드론 미래 배송 서비스 홍보",
+            "보성": "드론을 활용한 자연 풍경 촬영",
+            "정욱": "드론을 이용한 스포츠 경기 중계",
+            "우민": "드론을 활용한 교육 콘텐츠 제작"
+        };
+            "김예담": "노력의 가치를 아는 예담아! 오늘 정말 고생 많았어. 네가 보여준 열정은 충분히 멋졌단다. 다만, 우선순위를 정해 주어진 과업을 완벽히 마친 뒤에 다른 공부(영어)를 병행한다면 네 역량이 더 빛날 거야. 조금만 더 몰입해 보자, 분명 너만의 명작이 탄생할 거야!",
+            "보성": "아이디어가 보물인 보성이! 오늘 성실하게 참여하는 모습이 보기 좋았어. 여기서 한 단계 더 성장하려면 [서론-본론-결론-하이라이트]라는 뼈대를 튼튼히 세우는 연습이 필요해. 네 창의적인 생각들이 체계적인 구조를 만난다면 누구도 따라올 수 없는 영상이 될 거야!",
+            "문정욱": "잠재력이 무궁무진한 감독, 정욱아! 첫 수행평가를 치르느라 수고했다. 하지만 AI는 도구일 뿐, 영상의 주인은 정욱이 너 자신이야. 감독의 책임감을 갖고 음악과 내용 하나하나에 네 숨결을 불어넣어 보렴. 4교시의 피곤함을 이겨내고 수업 태도를 조금만 바로잡는다면, 너는 훨씬 더 큰 사람이 될 수 있어!",
+            "조우민": "성장의 즐거움을 증명한 우민아! 지난주보다 눈에 띄게 향상된 실력을 보며 선생님은 정말 뿌듯했단다. 지금처럼 '어제의 나보다 더 나은 오늘의 나'를 만드는 노력을 멈추지 마렴. 다음 영상에서는 또 어떤 발전을 보여줄지 벌써 기대가 되는구나!",
+            "김종학": "창의적인 눈을 가진 종학아! 너의 감각은 충분히 훌륭해. 다만 그 감각이 결실을 맺으려면 조금 더 깊은 집중력과 시간 투자가 필요하단다. 이번에 부족했던 영상 시간과 내용을 네 독창적인 아이디어로 채워보렴. 네가 집중하는 순간, 영상의 퀄리티는 마법처럼 변할 거야!"
+        };
+
+        const gradeCriteria = {
+            "12.5": "A: 흥미로운 플롯/콘티 시각화 명확, 자신감 있는 발표.",
+            "11": "B: 수행했으나 시선 처리 부족 또는 대본 의존.",
+            "9": "C: 콘티 단순, 기획 의도 전달 미흡.",
+            "7": "D: 홍보 목적 불일치, 구술 체계성 부족.",
+            "5": "E: 주도적 참여 없음, 유의미한 결과물 없음.",
+            "3": "I: 기본점수. 과제 제출했으나 결과물 없음."
+        };
+
+        // 로그인 1단계 확인
+        function nextLoginStep() {
+            const id = document.getElementById('student-id').value;
+            
+            // 관리자 마스터 키 체크 (1983)
+            if (id === "1983") {
+                alert('관리자 모드로 접속합니다.');
+                currentUser = "관리자";
+                showEvalScreen(currentUser);
+                return;
+            }
+
+            if (studentDB[id]) {
+                currentUser = studentDB[id];
+                const studentNum = parseInt(id.substring(2)); // 뒤의 두 자리 번호 추출
+                document.getElementById('binary-hint').innerText = `당신의 번호는 [${studentNum}번] 입니다.\n이 숫자를 8비트 2진수로 변환하여 입력하세요.`;
+                document.getElementById('login-step-1').classList.add('hidden');
+                document.getElementById('login-step-2').classList.remove('hidden');
+            } else {
+                alert('등록되지 않은 학번입니다.');
+            }
+        }
+
+        // 로그인 최종 확인 (2진수 검증)
+        function verifyLogin() {
+            const inputBinary = document.getElementById('binary-code').value.trim();
+            const id = document.getElementById('student-id').value;
+            const studentNum = parseInt(id.substring(2));
+            const correctBinary = studentNum.toString(2).padStart(8, '0');
+
+            if (inputBinary === correctBinary) {
+                alert(`${currentUser}님, 환영합니다. 보안이 해제되었습니다.`);
+                showEvalScreen(currentUser);
+            } else {
+                alert('2진수 변환값이 틀렸습니다. 다시 계산해 보세요.');
+            }
+        }
+
+        // 실시간 한국 시간 업데이트 기능
+        function updateKST() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ko-KR', { hour12: false });
+            const dateStr = now.toLocaleDateString('ko-KR');
+            document.getElementById('current-time-view').innerText = `KST: ${dateStr} ${timeStr}`;
+        }
+        setInterval(updateKST, 1000);
+
+        // QR 코드 생성 기능
+        function generateQRCodes() {
+            const currentUrl = encodeURIComponent(window.location.href);
+            const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${currentUrl}`;
+            const qrHtml = `<img src="${qrApi}" alt="QR Code" width="100" height="100">`;
+            document.getElementById('login-qr').innerHTML = qrHtml;
+            document.getElementById('admin-qr').innerHTML = qrHtml;
+        }
+        window.addEventListener('load', generateQRCodes);
+
+        // 로그인 성공 후 화면 전환 및 프로필 설정
+        function showEvalScreen(userName) {
+            const photoMap = {
+                "종학": "종학.jpg", "예담": "예담.jpg",
+                "보성": "보성.jpg", "정욱": "정욱.jpg", "우민": "우민.jpg"
+            };
+
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('eval-screen').classList.remove('hidden');
+            
+            // 본인 정보 상단 표시
+            document.getElementById('my-name-display').innerText = userName;
+            const myImg = document.getElementById('my-profile-img');
+            myImg.src = photoMap[userName] || "drone_hero.png";
+            myImg.onerror = function() { this.src = 'drone_hero.png'; };
+
+            // 평가자 자동 선택 고정
+            const evalSelect = document.getElementById('evaluator-name');
+            evalSelect.value = userName === "관리자" ? "" : userName;
+            evalSelect.disabled = userName !== "관리자";
+            filterTargetList();
+        }
+
+        // 평가 대상 동료 사진 업데이트
+        function updateStudentPhoto() {
+            const name = document.getElementById('target-name').value;
+            const container = document.getElementById('student-photo-container');
+            const img = document.getElementById('target-photo-img');
+            const nameDisplay = document.getElementById('target-name-display');
+
+            const photoMap = {
+                "종학": "종학.jpg", "예담": "예담.jpg",
+                "보성": "보성.jpg", "정욱": "정욱.jpg", "우민": "우민.jpg"
+            };
+
+            if (name) {
+                img.src = photoMap[name] || "drone_hero.png";
+                img.onerror = function() { this.src = 'drone_hero.png'; };
+                nameDisplay.innerText = `🎥 대상: ${name}`;
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function checkPassword() {
+            const pw = document.getElementById('access-password').value;
+            if (pw === ACCESS_PASSWORD) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('eval-screen').classList.remove('hidden');
+            } else {
+                alert('암호가 올바르지 않습니다.');
+            }
+        }
+
+        function calculateScore() {
+            const checkedCount = document.querySelectorAll('#checklist input:checked').length;
+            let targetGradeId = "";
+            let score = 0;
+
+            // 체크 개수에 따른 등급 및 점수 결정
+            if (checkedCount === 5) { targetGradeId = "grade-a"; score = 12.5; }
+            else if (checkedCount === 4) { targetGradeId = "grade-b"; score = 11; }
+            else if (checkedCount === 3) { targetGradeId = "grade-c"; score = 9; }
+            else if (checkedCount === 2 || checkedCount === 1) { targetGradeId = "grade-d"; score = 7; }
+            else { targetGradeId = "grade-e"; score = 5; }
+
+            // 하단 등급 라디오 버튼 자동 선택
+            const grades = document.getElementsByName('grade');
+            for (const g of grades) {
+                if (g.id === targetGradeId) {
+                    g.checked = true;
+                    document.getElementById('grade-info').innerText = gradeCriteria[g.value];
+                } else {
+                    g.checked = false;
+                }
+            }
+
+            document.getElementById('total-score').innerText = score.toFixed(1);
+            return score;
+        }
+
+        function generateAIFeedback() {
+            const topic = document.getElementById('video-topic').value;
+            const score = document.getElementById('total-score').innerText;
+            if (!topic) { alert('영상 주제를 먼저 입력해 주세요.'); return; }
+
+            const templates = [
+                `주제인 "${topic}"에 대한 전달력이 매우 우수합니다. 특히 기술적인 요소와 영상미의 조화가 돋보여 좋은 점수를 드렸습니다.`,
+                `"${topic}"이라는 주제를 창의적으로 풀어낸 점이 인상적입니다. 다만 체크리스트 중 일부 미흡한 부분이 보완된다면 완벽할 것 같습니다.`,
+                `영상에서 강조하신 "${topic}"의 가치가 잘 드러납니다. 전체적인 흐름이 자연스럽고 시각적 효과가 효과적입니다.`
+            ];
+            const randomIndex = Math.floor(Math.random() * templates.length);
+            document.getElementById('feedback').value = templates[randomIndex];
+            alert('AI가 주제를 분석하여 피드백을 생성했습니다.');
+        }
+
+        function submitEvaluation() {
+            const evaluator = document.getElementById('evaluator-name').value;
+            const target = document.getElementById('target-name').value;
+            const topic = document.getElementById('video-topic').value;
+            const score = parseFloat(document.getElementById('total-score').innerText);
+            const feedback = document.getElementById('feedback').value;
+
+            if (!evaluator) { alert('본인의 이름을 먼저 선택해 주세요.'); return; }
+            if (!target) { alert('평가 대상자를 선택해 주세요.'); return; }
+            if (evaluator === target) { alert('본인은 본인을 평가할 수 없습니다.'); return; }
+            if (!topic) { alert('영상 주제를 입력해 주세요.'); return; }
+
+            let selectedGrade = "";
+            const grades = document.getElementsByName('grade');
+            for (const g of grades) { if (g.checked) { selectedGrade = g.id.split('-')[1].toUpperCase(); break; } }
+            if (!selectedGrade) { alert('등급이 계산되지 않았습니다. 체크리스트를 확인하세요.'); return; }
+
+            // 주관적 등급 가져오기
+            let subjectiveGrade = "";
+            const sGrades = document.getElementsByName('subjective-grade');
+            for (const sg of sGrades) { if (sg.checked) { subjectiveGrade = sg.value; break; } }
+            if (!subjectiveGrade) { alert('동료의 주관적 등급을 선택해 주세요.'); return; }
+
+            // 체크박스 상태 수집
+            const checkList = [];
+            document.querySelectorAll('#checklist input').forEach(ck => checkList.push(ck.checked));
+
+            const evalData = {
+                evaluator: evaluator,
+                target: target,
+                topic: topic,
+                grade: selectedGrade,
+                subjectiveGrade: subjectiveGrade,
+                total: score,
+                feedback: feedback,
+                checks: checkList,
+                timestamp: new Date().toISOString()
+            };
+
+            evaluations.push(evalData);
+            localStorage.setItem('evaluations', JSON.stringify(evaluations));
+
+            alert('데이터가 서버에 실시간 저장되었습니다.');
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('target-name').selectedIndex = 0;
+            document.getElementById('feedback').value = '';
+            document.getElementById('total-score').innerText = '0';
+            document.getElementById('grade-info').innerText = '등급을 선택하면 기준이 표시됩니다.';
+            document.getElementById('student-photo-container').classList.add('hidden');
+
+            const grades = document.getElementsByName('grade');
+            for (const g of grades) g.checked = false;
+
+            const checks = document.querySelectorAll('#checklist input');
+            for (const c of checks) c.checked = false;
+        }
+
+        function showStats() {
+            const adminPw = prompt('관리자만 접근 가능합니다. 암호를 입력하세요:');
+            if (adminPw === "1983") {
+                document.getElementById('eval-screen').classList.add('hidden');
+                document.getElementById('stats-screen').classList.remove('hidden');
+                updateDashboard();
+            } else {
+                alert('관리자 암호가 틀렸습니다.');
+            }
+        }
+
+        function backToEval() {
+            document.getElementById('stats-screen').classList.add('hidden');
+            document.getElementById('eval-screen').classList.remove('hidden');
+        }
+
+        function updateDashboard() {
+            if (evaluations.length === 0) return;
+
+            // 개인별 상세 결과 렌더링
+            renderIndividualResults();
+        }
+        // 등급 계산 로직
+        function getGradeFromScore(score) {
+            if (score >= 12.0) return 'A';
+            if (score >= 10.5) return 'B';
+            if (score >= 8.5) return 'C';
+            if (score >= 6.5) return 'D';
+            if (score >= 4.5) return 'E';
+            return 'I';
+        }
+
+        // 리포트 개별 인쇄 함수
+        function printReport(studentName) {
+            window.print();
+        }
+
+        // BGM 토글 함수
+        function toggleBGM() {
+            const audio = document.getElementById('audio-bgm');
+            const status = document.getElementById('bgm-status');
+            if (audio.paused) {
+                audio.play();
+                status.innerText = "ON (Playing)";
+                status.style.color = "#00FF00";
+            } else {
+                audio.pause();
+                status.innerText = "OFF";
+                status.style.color = "#FFFF00";
+            }
+        }
+
+        // 개인별 상세 결과를 카드로 렌더링
+        function renderIndividualResults() {
+            const summary = {};
+            const photoMap = {
+                "종학": "종학.jpg", "예담": "예담.jpg",
+                "보성": "보성.jpg", "정욱": "정욱.jpg", "우민": "우민.jpg"
+            };
+
+            evaluations.forEach(e => {
+                if (!summary[e.target]) {
+                    summary[e.target] = { total: 0, count: 0, feedbacks: [], topics: [], checks: [0,0,0,0,0] };
+                }
+                summary[e.target].total += e.total;
+                summary[e.target].count += 1;
+                if (e.feedback) summary[e.target].feedbacks.push(e.feedback);
+                if (e.topic) summary[e.target].topics.push(e.topic);
+                if (e.checks) {
+                    e.checks.forEach((val, idx) => { if(val) summary[e.target].checks[idx]++; });
+                }
+            });
+
+            const container = document.getElementById('student-stats-list');
+            container.innerHTML = '';
+
+            for (const [student, data] of Object.entries(summary)) {
+                const avg = data.total / data.count;
+                const finalGrade = getGradeFromScore(avg);
+                const photo = photoMap[student] || "drone_hero.png";
+                
+                // 배지 자동 생성
+                let badges = '';
+                if(finalGrade === 'A') badges += '<span class="badge badge-pilot">🏆 Best Pilot</span>';
+                if(data.checks[3]/data.count >= 0.8) badges += '<span class="badge badge-idea">🎨 Idea Master</span>';
+                if(data.count >= 3) badges += '<span class="badge badge-effort">⚡ High Effort</span>';
+
+                const cardId = `chart-${student.replace(/\s/g, '')}`;
+                const card = document.createElement('div');
+                card.className = 'student-stat-card';
+                card.style.flexDirection = 'column';
+                card.style.alignItems = 'flex-start';
+                // 제출일시 포맷팅
+                const submitDate = new Date(data.lastTimestamp || new Date().toISOString());
+                const timeLabel = submitDate.toLocaleString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                card.innerHTML = `
+                    <div style="display:flex; width:100%; align-items:center; margin-bottom:15px;">
+                        <img src="${photo}" class="stat-photo" onerror="this.src='drone_hero.png'">
+                        <div class="stat-info">
+                            <div class="stat-name">${student}</div>
+                            <div class="stat-avg">참여: ${data.count}명 (${avg.toFixed(1)}점)</div>
+                            <div id="badges-${cardId}">${badges}</div>
+                        </div>
+                        <div class="stat-badge" style="font-size:32px; font-weight:900;">${finalGrade}</div>
+                    </div>
+                    
+                    <div style="display:flex; width:100%; gap:20px; margin-bottom:15px; flex-wrap:wrap;">
+                        <div class="radar-chart-container" style="width:200px; height:200px;">
+                            <canvas id="${cardId}"></canvas>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <div style="background:#222; padding:12px; border-radius:10px; font-size:12px; border-left:3px solid #FFFF00; margin-bottom:10px;">
+                                <strong style="color:#FFFF00;">🤖 AI 분석:</strong> ${finalGrade === 'A' ? '혁신적 기획입니다.' : '향후 보완이 기대됩니다.'}
+                            </div>
+                            <div style="background:rgba(255,255,0,0.05); padding:12px; border-radius:10px; font-size:11px; border:1px dashed #FFFF00;">
+                                <strong style="color:#FFFF00;">💌 선생님의 메시지:</strong><br>${(teacherComments[student] || "").replace(/\*/g, '')}
+                            </div>
+                            <p style="font-size:10px; color:#555; margin-top:10px; text-align:right;">📅 제출 완료: ${timeLabel}</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="window.print()" style="width:100%; font-size:11px;">🖨️ 개인 성적 리포트 출력</button>
+                `;
+                container.appendChild(card);
+
+                // 레이더 차트 생성 (개별 지표)
+                const ctx = document.getElementById(cardId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['길이', '자막', '조화', '아이디어', '시간'],
+                        datasets: [{
+                            label: '수행률 (%)',
+                            data: data.checks.map(c => (c/data.count)*100),
+                            backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                            borderColor: '#FFFF00',
+                            pointBackgroundColor: '#FFFF00'
+                        }]
+                    },
+                    options: {
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            r: {
+                                min: 0, max: 100,
+                                ticks: { display: false },
+                                grid: { color: '#333' },
+                                angleLines: { color: '#333' },
+                                pointLabels: { color: '#FFFF00', font: { size: 9 } }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            if (Object.keys(summary).length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">데이터가 없습니다.</p>';
+            }
+        }
+        function downloadCSV() {
+            if (evaluations.length === 0) { alert('데이터가 없습니다.'); return; }
+
+            const today = new Date().toISOString().split('T')[0];
+            let csv = "\uFEFF평가일,평가자,대상자,영상주제,선택등급,점수,피드백\n";
+            evaluations.forEach(e => {
+                csv += `${today},${e.evaluator},${e.target},"${e.topic.replace(/"/g, '""')}",${e.grade},${e.total},"${e.feedback.replace(/"/g, '""')}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${today}_드론콘텐츠_동료평가.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearAllData() {
+            if (confirm('모든 평가 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+                evaluations = [];
+                localStorage.removeItem('evaluations');
+                alert('초기화되었습니다.');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+
+</html>
