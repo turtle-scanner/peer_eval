@@ -7,6 +7,7 @@
     <title>DRONE CONTENTS PRODUCTION - Peer Evaluation System</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --bg-color: #050505;
@@ -416,8 +417,8 @@
 
     <div id="session-lock-overlay" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#FFFF00;">
         <h1 style="font-size:40px;">🔒</h1>
-        <h2>금일 평가 세션이<br>종료되었습니다.</h2>
-        <p style="color:#fff; opacity:0.7;">선생님의 안내에 따라 리포트를 확인하세요.</p>
+        <h2 id="lock-message-title">평가 세션이<br>종료되었습니다.</h2>
+        <p id="lock-message-body" style="color:#fff; opacity:0.7;">일요일 밤 12시 마감 기한이 경과했거나<br>관리자에 의해 세션이 종료되었습니다.</p>
         <button class="btn" onclick="checkLockStatus(true)" style="width:200px; background:none; border:1px solid #FFFF00; color:#FFFF00; margin-top:20px;">관리자 로그인</button>
     </div>
 
@@ -591,7 +592,7 @@
 
             <div class="input-group">
                 <label for="evaluator-name">1. 본인의 이름을 선택하세요 (필수)</label>
-                <select id="evaluator-name" onchange="filterTargetList()">
+                <select id="evaluator-name" onchange="filterTargetList(); saveDraft();">
                     <option value="" disabled selected>평가자 본인 선택</option>
                     <option value="선생님">선생님</option>
                     <option value="종학">종학</option>
@@ -604,7 +605,7 @@
 
             <div class="input-group">
                 <label for="target-name">2. 평가 대상 동료 선택</label>
-                <select id="target-name" onchange="updateStudentPhoto()">
+                <select id="target-name" onchange="updateStudentPhoto(); saveDraft();">
                     <option value="" disabled selected>동료 이름을 선택하세요</option>
                     <option value="종학">종학</option>
                     <option value="예담">예담</option>
@@ -620,15 +621,15 @@
 
             <label>3. 필수 체크리스트 (항목 누락 시 등급 자동 하락)</label>
             <div id="checklist" style="margin-bottom: 25px;">
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore(); saveDraft();">
                     <span class="checklist-text">1) 영상 길이 15분 준수</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore(); saveDraft();">
                     <span class="checklist-text">2) 돈 계산/미래 비교 자막 포함</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore(); saveDraft();">
                     <span class="checklist-text">3) 자막/음악 조화</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore(); saveDraft();">
                     <span class="checklist-text">4) 신선한 아이디어</span></label>
-                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore()">
+                <label class="checklist-item"><input type="checkbox" value="0.5" checked onchange="calculateScore(); saveDraft();">
                     <span class="checklist-text">5) 제출 시간 엄수</span></label>
             </div>
 
@@ -674,13 +675,13 @@
             <div class="input-group">
                 <label for="video-topic" style="color: #FFFF00; line-height: 1.5;">5. 대상학생의 영상주제 (구체적으로 작성)<br><span
                         style="color: #ff4444; font-size: 13px;">※ 틀리면 친구 영상을 안 보았다는 의미로 본인 점수가 하락합니다.</span></label>
-                <input type="text" id="video-topic" placeholder="예: 국내 캠핑(차박) 2박 3일 소개하기">
+                <input type="text" id="video-topic" placeholder="예: 국내 캠핑(차박) 2박 3일 소개하기" oninput="saveDraft()">
             </div>
 
             <div class="input-group">
                 <label for="feedback">7. 동료 피드백 & AI 추천</label>
-                <textarea id="feedback" rows="3" placeholder="주제와 점수를 기반으로 AI 추천 의견을 받아보세요"></textarea>
-                <button class="btn btn-secondary" onclick="generateAIFeedback()"
+                <textarea id="feedback" rows="3" placeholder="주제와 점수를 기반으로 AI 추천 의견을 받아보세요" oninput="saveDraft()"></textarea>
+                <button class="btn btn-secondary" onclick="generateAIFeedback(); saveDraft();"
                     style="margin-top:10px; font-size:14px;">🤖 AI 피드백 생성하기</button>
             </div>
 
@@ -688,11 +689,11 @@
                 style="background: rgba(255, 255, 255, 0.03); padding: 15px; border-radius: 12px; border: 1px dashed #555;">
                 <label>⭐ 내가 생각하는 동료의 주관적 등급</label>
                 <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="A"> A</label>
-                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="B"> B</label>
-                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="C"> C</label>
-                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="D"> D</label>
-                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="E"> E</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="A" onchange="saveDraft()"> A</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="B" onchange="saveDraft()"> B</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="C" onchange="saveDraft()"> C</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="D" onchange="saveDraft()"> D</label>
+                    <label style="font-size:12px;"><input type="radio" name="subjective-grade" value="E" onchange="saveDraft()"> E</label>
                 </div>
             </div>
 
@@ -885,8 +886,8 @@
 
             const id = document.getElementById('student-id').value;
 
-            // 관리자 마스터 키 체크 (1983)
-            if (id === "1983") {
+            // 관리자 마스터 키 체크 (ACCESS_PASSWORD 사용)
+            if (id === ACCESS_PASSWORD) {
                 alert('관리자 모드로 접속합니다.');
                 currentUser = "선생님";
                 showEvalScreen(currentUser);
@@ -1198,8 +1199,53 @@
             }
 
             alert('데이터가 구글 서버와 로컬에 실시간 저장되었습니다.');
+            
+            // [업그레이드] 제출 성공 기념 꽃가루 효과 🎉
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FFFF00', '#FFA500', '#FFFFFF', '#00FF00']
+            });
+
+            localStorage.removeItem('eval_draft'); // 임시 저장 삭제
             resetForm();
             updateDashboard(); // 제출 즉시 현황판 갱신
+        }
+
+        // [추가] 자동 저장 기능
+        function saveDraft() {
+            const draft = {
+                target: document.getElementById('target-name').value,
+                topic: document.getElementById('video-topic').value,
+                feedback: document.getElementById('feedback').value,
+                checks: Array.from(document.querySelectorAll('#checklist input')).map(i => i.checked),
+                subjective: Array.from(document.getElementsByName('subjective-grade')).find(r => r.checked)?.value
+            };
+            localStorage.setItem('eval_draft', JSON.stringify(draft));
+        }
+
+        function loadDraft() {
+            const draft = JSON.parse(localStorage.getItem('eval_draft'));
+            if (!draft) return;
+            
+            if (draft.target) {
+                document.getElementById('target-name').value = draft.target;
+                updateStudentPhoto();
+            }
+            if (draft.topic) document.getElementById('video-topic').value = draft.topic;
+            if (draft.feedback) document.getElementById('feedback').value = draft.feedback;
+            
+            const checks = document.querySelectorAll('#checklist input');
+            if (draft.checks) {
+                draft.checks.forEach((val, idx) => { if (checks[idx]) checks[idx].checked = val; });
+            }
+            
+            if (draft.subjective) {
+                const radios = document.getElementsByName('subjective-grade');
+                radios.forEach(r => { if (r.value === draft.subjective) r.checked = true; });
+            }
+            calculateScore();
         }
 
         function resetForm() {
@@ -1218,7 +1264,7 @@
 
         function showStats() {
             const adminPw = prompt('관리자만 접근 가능합니다. 암호를 입력하세요:');
-            if (adminPw === "1983") {
+            if (adminPw === ACCESS_PASSWORD) {
                 document.getElementById('eval-screen').classList.add('hidden');
                 document.getElementById('stats-screen').classList.remove('hidden');
                 updateDashboard();
@@ -1334,39 +1380,32 @@
                 "보성": "보성.jpg", "정욱": "정욱.jpg", "우민": "우민.jpg"
             };
 
-            // 1. 데이터 집계
-            evaluations.forEach(e => {
-                const target = (e.target || "").trim();
-                const evaluator = (e.evaluator || "").trim();
-                if (e.type === 'RESOLUTION') return;
-                
-                if (!summary[target]) {
-                    summary[target] = { total: 0, count: 0, feedbacks: [], topics: [], checks: [0, 0, 0, 0, 0] };
-                }
-                
-                // 자기 평가가 아닌 경우에만 동료 평균에 반영
-                if (target !== evaluator) {
-                    summary[target].total += e.total;
-                    summary[target].count += 1;
-                    if (e.feedback) summary[target].feedbacks.push(e.feedback);
-                    if (e.checks) {
-                        e.checks.forEach((val, idx) => { if (val) summary[target].checks[idx]++; });
-                    }
+            // [업그레이드] 반 평균 데이터 미리 계산
+            const classTotalChecks = [0, 0, 0, 0, 0];
+            let totalEvalsCount = 0;
+            evaluations.filter(e => e.type !== 'RESOLUTION').forEach(e => {
+                if (e.checks) {
+                    e.checks.forEach((val, idx) => { if (val) classTotalChecks[idx]++; });
+                    totalEvalsCount++;
                 }
             });
+            const classAverages = classTotalChecks.map(c => totalEvalsCount > 0 ? (c / totalEvalsCount) * 100 : 0);
 
             const container = document.getElementById('student-stats-list');
             container.innerHTML = '';
 
             for (const [student, data] of Object.entries(summary)) {
-                if (data.count === 0) continue; // 아무도 평가 안 했으면 스킵 (자기평가만 있는 경우 등)
+                if (data.count === 0) continue;
                 
                 const avg = data.total / data.count;
                 const finalGrade = getGradeFromScore(avg);
                 const photo = photoMap[student] || "drone_hero.png";
                 
-                // 자기 평가 데이터 따로 추출
                 const selfEval = evaluations.find(e => (e.target || "").trim() === student && (e.evaluator || "").trim() === student);
+
+                // [업그레이드] AI 키워드 태그 생성
+                const keywords = generateAIKeywords(data.checks, data.count);
+                const keywordHtml = keywords.map(tag => `<span style="display:inline-block; font-size:10px; background:rgba(255,255,0,0.1); color:#FFFF00; padding:2px 6px; border-radius:10px; margin-right:5px; margin-bottom:5px; border:1px solid rgba(255,255,0,0.2);">${tag}</span>`).join('');
 
                 // 배지 생성
                 let badges = '';
@@ -1375,7 +1414,7 @@
 
                 const cardId = `chart-${student.replace(/\s/g, '')}`;
                 const card = document.createElement('div');
-                card.className = 'card glass'; // 프리미엄 글래스 테마 적용
+                card.className = 'card glass';
                 card.style.border = '1px solid rgba(255,255,255,0.1)';
                 
                 card.innerHTML = `
@@ -1384,21 +1423,25 @@
                         <div style="flex:1;">
                             <div style="font-size:18px; font-weight:bold; color:#FFFF00;">${student} 학생</div>
                             <div style="font-size:12px; opacity:0.8;">참여 동료: ${data.count}명 (${avg.toFixed(1)}점)</div>
+                            <div style="margin-top:8px;">${keywordHtml}</div>
                             <div style="margin-top:5px;">${badges}</div>
                         </div>
                         <div style="font-size:32px; font-weight:900; color:#FFFF00;">${finalGrade}</div>
                     </div>
                     
                     <div style="display:flex; width:100%; gap:20px; flex-wrap:wrap;">
-                        <div style="width:220px; height:220px; background:rgba(0,0,0,0.2); border-radius:15px; padding:10px;">
+                        <div style="width:220px; height:220px; background:rgba(0,0,0,0.15); border-radius:15px; padding:10px;">
                             <canvas id="${cardId}"></canvas>
                         </div>
                         <div style="flex:1; min-width:200px;">
                             <div style="background:rgba(255,255,0,0.05); padding:12px; border-radius:10px; font-size:11px; border:1px dashed #FFFF00; margin-bottom:10px;">
                                 <strong style="color:#FFFF00;">💌 선생님의 메시지:</strong><br>${(teacherComments[student] || "성장을 응원합니다!").replace(/\*/g, '')}
                             </div>
-                            <div style="background:rgba(74, 222, 128, 0.1); padding:12px; border-radius:10px; font-size:11px; border-left:3px solid #4ade80;">
-                                <strong style="color:#4ade80;">📈 자기 성찰 비교:</strong> ${selfEval ? '본인의 판단과 친구들의 시선이 담겨있습니다.' : '아직 자기성찰 제출 전입니다.'}
+                            <div style="background:rgba(74, 222, 128, 0.08); padding:12px; border-radius:10px; font-size:11px; border-left:3px solid #4ade80; margin-bottom:10px;">
+                                <strong style="color:#4ade80;">📈 인사이트:</strong> ${selfEval ? '자기 객관화가 매우 우수한 상태입니다.' : '동료들의 평가를 분석해 보세요.'}
+                            </div>
+                            <div style="font-size:10px; color:#888; line-height:1.4;">
+                                ※ 노란색 영역(동료)이 파란색 실선(반 평균)보다 바깥에 있을수록 해당 분야의 상위권임을 의미합니다.
                             </div>
                         </div>
                     </div>
@@ -1407,20 +1450,34 @@
 
                 // 차트 생성
                 const ctx = document.getElementById(cardId).getContext('2d');
-                const datasets = [{
-                    label: '동료 평가 (%)',
-                    data: data.checks.map(c => (c / data.count) * 100),
-                    backgroundColor: 'rgba(255, 255, 0, 0.2)',
-                    borderColor: '#FFFF00',
-                    pointBackgroundColor: '#FFFF00'
-                }];
+                const datasets = [
+                    {
+                        label: '동료 평가 (%)',
+                        data: data.checks.map(c => (c / data.count) * 100),
+                        backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                        borderColor: '#FFFF00',
+                        fill: true,
+                        pointBackgroundColor: '#FFFF00'
+                    },
+                    {
+                        label: '반 평균 (%)',
+                        data: classAverages,
+                        backgroundColor: 'transparent',
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ];
 
                 if (selfEval && selfEval.checks) {
                     datasets.push({
                         label: '나의 성찰 (%)',
                         data: selfEval.checks.map(c => c ? 100 : 0),
-                        backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                        backgroundColor: 'transparent',
                         borderColor: '#4ade80',
+                        borderWidth: 2,
+                        fill: false,
                         pointBackgroundColor: '#4ade80'
                     });
                 }
@@ -1599,16 +1656,43 @@
             }
         }
 
-        // [추가] 세션 잠금 관련 로직
+        // [추가] 세션 잠금 및 자동 개방/마감 로직
         function checkLockStatus(isAdminRequest = false) {
-            const isLocked = localStorage.getItem('session_locked') === 'true';
             const overlay = document.getElementById('session-lock-overlay');
+            
+            // 시간 설정 (시작: 금요일 15:00 / 마감: 일요일 밤 24시)
+            const startTime = new Date('2026-04-17T15:00:00');
+            const deadline = new Date('2026-04-20T00:00:00');
+            const now = new Date();
+            
+            const notOpened = now < startTime;
+            const alreadyClosed = now >= deadline;
+
+            // 관리자가 수동으로 잠갔는지 확인
+            let manualLocked = localStorage.getItem('session_locked') === 'true';
+            
+            // [정책] 평가 기간 동안에는 자동으로 잠금 해제 유지
+            if (now >= startTime && now < deadline && manualLocked && !isAdminRequest) {
+                localStorage.setItem('session_locked', 'false');
+                manualLocked = false;
+            }
+
+            const isLocked = manualLocked || notOpened || alreadyClosed;
+
             if (isLocked && !isAdminRequest) {
                 overlay.classList.remove('hidden');
+                if (notOpened) {
+                    document.getElementById('lock-message-title').innerHTML = "평가 세션<br>준비 중입니다.";
+                    document.getElementById('lock-message-body').innerText = "평가 오픈 시간: 금요일 15:00 정각";
+                } else if (alreadyClosed) {
+                    document.getElementById('lock-message-title').innerHTML = "평가 기간이<br>최종 마감되었습니다.";
+                    document.getElementById('lock-message-body').innerText = "일요일 밤 12시 마감 데드라인이 경과되었습니다.";
+                }
             } else if (isAdminRequest) {
                 const adminPw = prompt('관리자 암호를 입력하세요:');
-                if (adminPw === "1983") {
+                if (adminPw === ACCESS_PASSWORD) {
                     overlay.classList.add('hidden');
+                    localStorage.setItem('session_locked', 'false');
                 }
             } else {
                 overlay.classList.add('hidden');
@@ -1685,6 +1769,8 @@
             generateQRCodes();
             checkLockStatus();
             if (typeof tryAutoplay === 'function') tryAutoplay();
+            // 임시 저장 데이터 로드
+            loadDraft();
         };
 
         // 기존 updateDashboard 끝단에 다짐 월 랜더링 추가
