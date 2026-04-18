@@ -415,14 +415,8 @@
     <!-- 실시간 한국 시간 표시 -->
     <div id="current-time-view" class="time-display">KST: --:--:--</div>
 
-    <div id="session-lock-overlay" class="hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#FFFF00;">
-        <h1 style="font-size:40px;">🔒</h1>
-        <h2 id="lock-message-title">평가 세션이<br>종료되었습니다.</h2>
-        <p id="lock-message-body" style="color:#fff; opacity:0.7;">일요일 밤 12시 마감 기한이 경과했거나<br>관리자에 의해 세션이 종료되었습니다.</p>
-        <button class="btn" onclick="checkLockStatus(true)" style="width:200px; background:none; border:1px solid #FFFF00; color:#FFFF00; margin-top:20px;">관리자 로그인</button>
-    </div>
+    <div id="bgm-player" class="glass bgm-control" onclick="toggleBGM()">
 
-    <div id="bgm-player" class="bgm-control" onclick="toggleBGM()">
         <span>🎵 웅장한 비행 BGM</span>
         <span id="bgm-status">OFF</span>
     </div>
@@ -708,11 +702,8 @@
         <div id="stats-screen" class="card glass hidden">
             <h2 style="font-size: 24px; letter-spacing: -1px;">🏆 ANTI-GRAVITY HALL OF FAME</h2>
 
-            <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
-                <button id="lock-btn" class="btn" style="width:auto; padding:8px 15px; font-size:12px; background:#ff4444; color:white;" onclick="toggleSessionLock()">🔒 세션 마감하기</button>
-            </div>
-
             <!-- 실시간 어워드 보드 -->
+
 
             <!-- 실시간 어워드 보드 -->
             <div id="award-board" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
@@ -1656,74 +1647,7 @@
             }
         }
 
-        // [추가] 세션 잠금 및 한국 시간(KST) 기준 자동 개방/마감 로직 (정밀 보정판)
-        function checkLockStatus(isAdminRequest = false) {
-            const overlay = document.getElementById('session-lock-overlay');
-            if (!overlay) return;
 
-            // [비상수단] URL에 ?unlock=1983 이 포함되어 있으면 강제 해제
-            if (window.location.search.includes('unlock=1983')) {
-                localStorage.setItem('session_locked', 'false');
-                overlay.classList.add('hidden');
-                return;
-            }
-
-            // [핵심] 한국 시간(KST) 정밀 계산
-            const nowKST = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
-            const nowMs = nowKST.getTime();
-
-            // 기준 시간 설정 (ms 단위 변환)
-            const startMs = new Date('2026-04-17T15:00:00+09:00').getTime();
-            const endMs = new Date('2026-04-20T00:00:00+09:00').getTime();
-            
-            const notOpened = nowMs < startMs;
-            const alreadyClosed = nowMs >= endMs;
-
-            // 관리자 수동 잠금 상태 확인
-            let manualLocked = localStorage.getItem('session_locked') === 'true';
-            
-            // [강제 정책] 현재 한국 시간 기준 평가 기간 내(금~일)라면 모든 잠금 기록을 파괴하고 개방함
-            if (nowMs >= startMs && nowMs < endMs) {
-                localStorage.setItem('session_locked', 'false');
-                manualLocked = false;
-            }
-
-            const isLocked = manualLocked || notOpened || alreadyClosed;
-
-            if (isLocked && !isAdminRequest) {
-                overlay.classList.remove('hidden');
-                if (notOpened) {
-                    document.getElementById('lock-message-title').innerHTML = "평가 세션<br>준비 중입니다.";
-                    document.getElementById('lock-message-body').innerText = "평가 오픈 시간: 금요일 15:00 정각";
-                } else if (alreadyClosed) {
-                    document.getElementById('lock-message-title').innerHTML = "평가 기간이<br>최종 마감되었습니다.";
-                    document.getElementById('lock-message-body').innerText = "일요일 밤 12시 마감 기한이 경과되었습니다.";
-                }
-            } else if (isAdminRequest) {
-                const adminPw = prompt('관리자 암호를 입력하세요:');
-                if (adminPw && adminPw.trim() === "1983") {
-                    overlay.classList.add('hidden');
-                    localStorage.setItem('session_locked', 'false');
-                    alert('보안 인증 성공! 세션이 강제로 개방되었습니다.');
-                    location.reload(); 
-                } else if (adminPw !== null) {
-                    alert('암호가 틀렸습니다.');
-                }
-            } else {
-                overlay.classList.add('hidden');
-            }
-        }
-
-        function toggleSessionLock() {
-            const isLocked = localStorage.getItem('session_locked') === 'true';
-            const nextStatus = !isLocked;
-            localStorage.setItem('session_locked', nextStatus);
-            const btn = document.getElementById('lock-btn');
-            btn.innerText = nextStatus ? "🔓 세션 잠금 해제" : "🔒 세션 마감하기";
-            btn.style.background = nextStatus ? "#4CAF50" : "#ff4444";
-            alert(nextStatus ? '평가 세션이 마감되었습니다.' : '평가 세션이 다시 열렸습니다.');
-            checkLockStatus();
-        }
 
         // [추가] 학생별 평가 진행도 업데이트
         function updateMyProgress() {
@@ -1782,7 +1706,6 @@
         window.onload = function () {
             initSystem();
             generateQRCodes();
-            checkLockStatus();
             if (typeof tryAutoplay === 'function') tryAutoplay();
             // 임시 저장 데이터 로드
             loadDraft();
