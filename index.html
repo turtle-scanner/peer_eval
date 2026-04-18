@@ -1656,26 +1656,30 @@
             }
         }
 
-        // [추가] 세션 잠금 및 자동 개방/마감 로직
+        // [추가] 세션 잠금 및 한국 시간(KST) 기준 자동 개방/마감 로직
         function checkLockStatus(isAdminRequest = false) {
             const overlay = document.getElementById('session-lock-overlay');
+            if (!overlay) return;
+
+            // [핵심] 전세계 어디서든 한국 시간(KST)을 정확히 계산
+            const nowKST = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+
+            // 기준 시간 설정 (KST 기준)
+            const startTime = new Date('2026-04-17T15:00:00+09:00'); // 금요일 15시
+            const deadline = new Date('2026-04-20T00:00:00+09:00');  // 일요일 밤 24시
             
-            // 시간 설정 (시작: 금요일 15:00 / 마감: 일요일 밤 24시)
-            const startTime = new Date('2026-04-17T15:00:00');
-            const deadline = new Date('2026-04-20T00:00:00');
-            const now = new Date();
-            
-            const notOpened = now < startTime;
-            const alreadyClosed = now >= deadline;
+            const notOpened = nowKST < startTime;
+            const alreadyClosed = nowKST >= deadline;
 
             // 관리자가 수동으로 잠갔는지 확인
             let manualLocked = localStorage.getItem('session_locked') === 'true';
             
-            // [중요] 평가 기간(금요일 15시 ~ 일요일 24시) 내라면 기존 수동 잠금을 무시하고 강제 해제
-            if (now >= startTime && now < deadline && manualLocked && !isAdminRequest) {
-                console.log("평가 기간 내 접속 감지: 잠금을 자동으로 해제합니다.");
-                localStorage.setItem('session_locked', 'false');
-                manualLocked = false;
+            // [정책] 현재 KST 기준 평가 기간 내라면 무조건 잠금 해제
+            if (nowKST >= startTime && nowKST < deadline) {
+                if (manualLocked) {
+                    localStorage.setItem('session_locked', 'false');
+                    manualLocked = false;
+                }
             }
 
             const isLocked = manualLocked || notOpened || alreadyClosed;
@@ -1687,7 +1691,7 @@
                     document.getElementById('lock-message-body').innerText = "평가 오픈 시간: 금요일 15:00 정각";
                 } else if (alreadyClosed) {
                     document.getElementById('lock-message-title').innerHTML = "평가 기간이<br>최종 마감되었습니다.";
-                    document.getElementById('lock-message-body').innerText = "일요일 밤 12시 마감 데드라인이 경과되었습니다.";
+                    document.getElementById('lock-message-body').innerText = "일요일 밤 12시 마감 기한이 경과되었습니다.";
                 }
             } else if (isAdminRequest) {
                 const adminPw = prompt('관리자 암호를 입력하세요:');
@@ -1695,7 +1699,7 @@
                     overlay.classList.add('hidden');
                     localStorage.setItem('session_locked', 'false');
                     alert('관리자 인증 성공! 세션 잠금이 해제되었습니다.');
-                    location.reload(); // 상태 반영을 위해 새로고침
+                    location.reload(); 
                 } else if (adminPw !== null) {
                     alert('암호가 틀렸습니다.');
                 }
