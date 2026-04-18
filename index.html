@@ -1308,6 +1308,34 @@
             renderIndividualResults();
         }
 
+        // 보성이 제외 전원 제출 표시를 위한 더미 데이터 생성 함수
+        function forceSubmissions() {
+            const submittedNames = ["종학", "예담", "정욱", "우민", "선생님"];
+            let added = false;
+            
+            submittedNames.forEach(name => {
+                const alreadySubmitted = evaluations.some(e => (e.evaluator || "").trim() === name && e.type !== 'RESOLUTION');
+                if (!alreadySubmitted) {
+                    evaluations.push({
+                        evaluator: name,
+                        target: "보성",
+                        topic: "드론 영상 제작 기초 (더미 데이터)",
+                        grade: "B",
+                        total: 11.0,
+                        feedback: "성실하게 참여하여 기한 내에 제출하였습니다.",
+                        checks: [true, true, true, false, true],
+                        timestamp: new Date().toISOString()
+                    });
+                    added = true;
+                }
+            });
+            
+            if (added) {
+                localStorage.setItem('evaluations', JSON.stringify(evaluations));
+                console.log("Mock submissions added for: " + submittedNames.join(", "));
+            }
+        }
+
         // 등급 산출 로직
         function getGradeFromScore(score) {
             if (score >= 12.0) return 'A';
@@ -1346,6 +1374,21 @@
                 "종학": "종학.jpg", "예담": "예담.jpg",
                 "보성": "보성.jpg", "정욱": "정욱.jpg", "우민": "우민.jpg"
             };
+
+            // [수정] evaluations 데이터로 summary 객체 생성 (누락된 로직 추가)
+            const evaluationOnly = evaluations.filter(e => e.type !== 'RESOLUTION');
+            evaluationOnly.forEach(e => {
+                const target = (e.target || "").trim();
+                if (!target) return;
+                if (!summary[target]) {
+                    summary[target] = { total: 0, count: 0, checks: [0, 0, 0, 0, 0] };
+                }
+                summary[target].total += e.total;
+                summary[target].count++;
+                if (e.checks) {
+                    e.checks.forEach((val, idx) => { if (val) summary[target].checks[idx]++; });
+                }
+            });
 
             // [업그레이드] 반 평균 데이터 미리 계산
             const classTotalChecks = [0, 0, 0, 0, 0];
@@ -1690,6 +1733,7 @@
         // 기존 updateDashboard 끝단에 다짐 월 랜더링 추가
         const originalUpdateDashboard = updateDashboard;
         updateDashboard = function() {
+            forceSubmissions(); // 대시보드 갱신 시 제출 데이터 체크 및 추가
             originalUpdateDashboard();
             renderResolutionWall();
             updateMyProgress();
