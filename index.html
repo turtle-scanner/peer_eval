@@ -1671,8 +1671,9 @@
             // 관리자가 수동으로 잠갔는지 확인
             let manualLocked = localStorage.getItem('session_locked') === 'true';
             
-            // [정책] 평가 기간 동안에는 자동으로 잠금 해제 유지
+            // [중요] 평가 기간(금요일 15시 ~ 일요일 24시) 내라면 기존 수동 잠금을 무시하고 강제 해제
             if (now >= startTime && now < deadline && manualLocked && !isAdminRequest) {
+                console.log("평가 기간 내 접속 감지: 잠금을 자동으로 해제합니다.");
                 localStorage.setItem('session_locked', 'false');
                 manualLocked = false;
             }
@@ -1690,9 +1691,13 @@
                 }
             } else if (isAdminRequest) {
                 const adminPw = prompt('관리자 암호를 입력하세요:');
-                if (adminPw === ACCESS_PASSWORD) {
+                if (adminPw && adminPw.trim() === "1983") {
                     overlay.classList.add('hidden');
                     localStorage.setItem('session_locked', 'false');
+                    alert('관리자 인증 성공! 세션 잠금이 해제되었습니다.');
+                    location.reload(); // 상태 반영을 위해 새로고침
+                } else if (adminPw !== null) {
+                    alert('암호가 틀렸습니다.');
                 }
             } else {
                 overlay.classList.add('hidden');
