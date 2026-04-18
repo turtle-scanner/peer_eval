@@ -859,7 +859,7 @@
             "3": "I: 기본점수. 과제 제출했으나 결과물 없음."
         };
 
-        // 통합 로그인 핸들러
+        // 통합 로그인 핸들러 (마스터 비번 & 학생용 2진수 비번 지원)
         function handleLogin() {
             const idInput = document.getElementById('student-id').value.trim();
             const passwordInput = document.getElementById('login-password').value.trim();
@@ -869,26 +869,33 @@
                 return;
             }
 
-            // 비밀번호 확인 (마스터 비밀번호: 1983)
-            if (passwordInput !== ACCESS_PASSWORD) {
-                alert('접속 비밀번호가 올바르지 않습니다.');
+            // 1. 마스터 비밀번호 확인 (1983)
+            const isMaster = (passwordInput === ACCESS_PASSWORD);
+
+            // 2. 학생용 2진수 비밀번호 매칭 확인
+            let isStudentBinaryMatch = false;
+            if (/^\d+$/.test(idInput) && idInput.length >= 2) {
+                const studentNum = parseInt(idInput.substring(idInput.length - 2));
+                const correctBinary = studentNum.toString(2).padStart(8, '0');
+                if (passwordInput === correctBinary) {
+                    isStudentBinaryMatch = true;
+                }
+            }
+
+            if (!isMaster && !isStudentBinaryMatch) {
+                alert('비밀번호가 올바르지 않습니다. (본인의 번호를 8비트 2진수로 입력하세요)');
                 return;
             }
 
             // 사용자 식별 (학번 또는 이름 모두 검색)
             let userMatch = null;
-            
-            // 학번 칸에 마스터 비밀번호를 넣어도 선생으로 승인 (단, 비밀번호도 맞아야 함)
             if (idInput === ACCESS_PASSWORD) {
                 userMatch = "선생님";
             } else if (studentDB[idInput]) {
                 userMatch = studentDB[idInput];
             } else {
-                // 이름으로 검색
                 const foundName = Object.values(studentDB).find(name => name === idInput);
-                if (foundName) {
-                    userMatch = foundName;
-                }
+                if (foundName) userMatch = foundName;
             }
 
             if (userMatch) {
@@ -896,7 +903,7 @@
                 alert(`${userMatch}님, 인증되었습니다. 시스템에 접속합니다.`);
                 showEvalScreen(userMatch);
             } else {
-                alert('등록되지 않은 사용자 정보입니다. 학번 또는 이름을 다시 확인하세요.');
+                alert('등록되지 않은 사용자 정보입니다.');
             }
         }
 
