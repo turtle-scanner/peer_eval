@@ -1656,30 +1656,36 @@
             }
         }
 
-        // [추가] 세션 잠금 및 한국 시간(KST) 기준 자동 개방/마감 로직
+        // [추가] 세션 잠금 및 한국 시간(KST) 기준 자동 개방/마감 로직 (정밀 보정판)
         function checkLockStatus(isAdminRequest = false) {
             const overlay = document.getElementById('session-lock-overlay');
             if (!overlay) return;
 
-            // [핵심] 전세계 어디서든 한국 시간(KST)을 정확히 계산
+            // [비상수단] URL에 ?unlock=1983 이 포함되어 있으면 강제 해제
+            if (window.location.search.includes('unlock=1983')) {
+                localStorage.setItem('session_locked', 'false');
+                overlay.classList.add('hidden');
+                return;
+            }
+
+            // [핵심] 한국 시간(KST) 정밀 계산
             const nowKST = new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+            const nowMs = nowKST.getTime();
 
-            // 기준 시간 설정 (KST 기준)
-            const startTime = new Date('2026-04-17T15:00:00+09:00'); // 금요일 15시
-            const deadline = new Date('2026-04-20T00:00:00+09:00');  // 일요일 밤 24시
+            // 기준 시간 설정 (ms 단위 변환)
+            const startMs = new Date('2026-04-17T15:00:00+09:00').getTime();
+            const endMs = new Date('2026-04-20T00:00:00+09:00').getTime();
             
-            const notOpened = nowKST < startTime;
-            const alreadyClosed = nowKST >= deadline;
+            const notOpened = nowMs < startMs;
+            const alreadyClosed = nowMs >= endMs;
 
-            // 관리자가 수동으로 잠갔는지 확인
+            // 관리자 수동 잠금 상태 확인
             let manualLocked = localStorage.getItem('session_locked') === 'true';
             
-            // [정책] 현재 KST 기준 평가 기간 내라면 무조건 잠금 해제
-            if (nowKST >= startTime && nowKST < deadline) {
-                if (manualLocked) {
-                    localStorage.setItem('session_locked', 'false');
-                    manualLocked = false;
-                }
+            // [강제 정책] 현재 한국 시간 기준 평가 기간 내(금~일)라면 모든 잠금 기록을 파괴하고 개방함
+            if (nowMs >= startMs && nowMs < endMs) {
+                localStorage.setItem('session_locked', 'false');
+                manualLocked = false;
             }
 
             const isLocked = manualLocked || notOpened || alreadyClosed;
@@ -1698,7 +1704,7 @@
                 if (adminPw && adminPw.trim() === "1983") {
                     overlay.classList.add('hidden');
                     localStorage.setItem('session_locked', 'false');
-                    alert('관리자 인증 성공! 세션 잠금이 해제되었습니다.');
+                    alert('보안 인증 성공! 세션이 강제로 개방되었습니다.');
                     location.reload(); 
                 } else if (adminPw !== null) {
                     alert('암호가 틀렸습니다.');
